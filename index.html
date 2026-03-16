@@ -42,11 +42,14 @@ html { scroll-behavior: smooth; font-size: 16px; }
 /* CSS-first reveal — JS only adds .is-visible */
 .js-reveal {
   opacity: 0;
-  transform: translateY(20px);
-  transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1),
-              transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  transform: translateY(16px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
 }
 .js-reveal.is-visible { opacity: 1; transform: none; }
+/* Fallback: if JS fails, still show content */
+@media (prefers-reduced-motion: reduce) {
+  .js-reveal { opacity: 1; transform: none; }
+}
 
 body {
   background: var(--ink);
@@ -1527,15 +1530,41 @@ footer {
 </div>
 
 <script>
-/* ─────────────────────────────────────────────
-   ARCANA — main.js (v2 — corrected)
-   1. Smooth-scroll nav (real hrefs, no blanket preventDefault)
-   2. CSS-first IntersectionObserver (.js-reveal → .is-visible)
-   3. Credibility bar animation trigger
-   4. Article modal — keyboard accessible, focus-trapped
-───────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════
+   ARCANA — main.js v3 (clean rebuild)
+   Fixes: invisible cards, broken buttons, modal
+═══════════════════════════════════════════════ */
 
-// ── 1. NAV ──────────────────────────────────────
+// ── 1. REVEAL — low threshold, always fires ─────
+(function() {
+  const els = document.querySelectorAll(
+    '.entry-card, .sb-block, .tl-item, .featured-entry, .deep-dive, .category-strip, .timeline-section'
+  );
+  // Add class immediately, then observe
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(en => {
+      if (en.isIntersecting) {
+        en.target.classList.add('js-reveal');
+        // Small delay so CSS transition fires
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => en.target.classList.add('is-visible'));
+        });
+        io.unobserve(en.target);
+      }
+    });
+  }, { threshold: 0.01, rootMargin: '0px 0px 0px 0px' });
+
+  els.forEach(el => io.observe(el));
+
+  // Safety net: reveal everything after 1.5s regardless
+  setTimeout(() => {
+    els.forEach(el => {
+      el.classList.add('js-reveal', 'is-visible');
+    });
+  }, 1500);
+})();
+
+// ── 2. SMOOTH-SCROLL NAV ────────────────────────
 const NAV_MAP = {
   'Komplo Teorileri':     '#komplo-teorileri',
   'Antik Mitoloji':       '#antik-mitoloji',
@@ -1561,286 +1590,270 @@ document.querySelectorAll('.topnav a').forEach(a => {
   }
 });
 
-// ── 2. CSS-FIRST REVEAL ─────────────────────────
-const revealObs = new IntersectionObserver(entries => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('is-visible');
-      revealObs.unobserve(entry.target);
-    }
-  });
-}, { threshold: 0.08, rootMargin: '0px 0px -40px 0px' });
-
-document.querySelectorAll('.entry-card, .sb-block, .tl-item, .featured-entry, .deep-dive').forEach(el => {
-  el.classList.add('js-reveal');
-  revealObs.observe(el);
-});
-
 // ── 3. CREDIBILITY BARS ─────────────────────────
-const barObs = new IntersectionObserver(entries => {
+new IntersectionObserver((entries) => {
   entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.querySelectorAll('.cred-fill').forEach(fill => {
-        const clone = fill.cloneNode(true);
-        fill.parentNode.replaceChild(clone, fill);
+    if (!e.isIntersecting) return;
+    e.target.querySelectorAll('.cred-fill').forEach(fill => {
+      const w = fill.style.width;
+      fill.style.width = '0';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => { fill.style.width = w; });
       });
-      barObs.unobserve(e.target);
-    }
+    });
   });
-}, { threshold: 0.4 });
-document.querySelectorAll('.sb-block').forEach(b => barObs.observe(b));
+}, { threshold: 0.3 }).observe(
+  document.querySelector('.sb-block:has(.cred-fill)') || document.body
+);
 
-// ── 4. MODAL DATA ────────────────────────────────
-const ARTICLES = {
-  anunnaki: {
-    cat: 'Antik Mitoloji · Sümeroloji',
-    title: 'Anunnaki: Tanrılar mı, Uzaylılar mı, Sembol mü?',
-    body: '<p>Sümer çivi yazılarında geçen <em>Anunnaki</em> terimi dilbilimsel olarak "yüksekten inenler" biçiminde çevrilir. Ana akım Sümeroloji bu varlıkları Mezopotamya panteonunun yeraltı tanrıları olarak tanımlar.</p><p>Zecharia Sitchin\'in 1976 tarihli <em>The Twelfth Planet</em> kitabı, Sümer metinlerini Nibiru gezegenden gelen uzaylı bir ırkın kanıtı olarak okur. Akademik dilbilimciler bu çevirileri reddeder.</p><p>Kesin olan: Anunnaki metinleri MÖ 3. binyıla ait gerçek belgelerdir.</p>',
-    meta: [{ k: 'Dönem', v: 'MÖ ~3000' }, { k: 'Kaynak', v: 'Sümer Çivi Yazıları' }, { k: 'Güvenilirlik', v: 'Tartışmalı' }],
-    sources: [
-      { text: 'Thorkild Jacobsen — Treasures of Darkness (1976)', url: 'https://www.worldcat.org/title/treasures-of-darkness' },
-      { text: 'Michael S. Heiser — Sitchin Is Wrong', url: 'https://www.sitchiniswrong.com' },
-      { text: 'British Museum — Sümer Koleksiyonu', url: 'https://www.britishmuseum.org/collection' }
-    ]
-  },
-  atlantis: {
-    cat: 'Kayıp Medeniyetler · Antik Felsefe',
-    title: "Atlantis'in Coğrafyası: Platon'dan Günümüze",
-    body: "<p>Atlantis anlatısı MÖ 360'larda Platon'un <em>Timaios</em> ve <em>Kritias</em> diyaloglarında ortaya çıkar. Betimlenen uygarlık tek bir günde sulara gömülen dev bir ada imparatorluğudur.</p><p>Araştırmacılar üç yaklaşım benimser: felsefi alegori; Ege'deki Thera patlamasının mitik çarpıtması; veya gerçek bir uygarlığın kaydı. İlk ikisi akademide kabul görür.</p>",
-    meta: [{ k: 'Kaynak', v: "Platon (MÖ ~360)" }, { k: 'Kategori', v: 'Mitoloji / Arkeoloji' }, { k: 'Durum', v: 'Allegorik veya Mitik' }],
-    sources: [
-      { text: "Platon — Timaios & Kritias", url: 'https://www.gutenberg.org/ebooks/1572' },
-      { text: 'Encyclopedia Britannica — Atlantis', url: 'https://www.britannica.com/place/Atlantis-legendary-island' },
-      { text: 'National Geographic — The Real Atlantis?', url: 'https://www.nationalgeographic.com' }
-    ]
-  },
-  ra: {
-    cat: 'Antik Mitoloji · Mısır Dini',
-    title: 'Ra Kültü ve Güneş Monoteizmi',
-    body: "<p>Ra, Antik Mısır'ın baş güneş tanrısıdır. MÖ 14. yüzyılda Firavun Akhenaton tek bir güneş diski olan Aton'u ilan etti — tarihte kayıtlı ilk devlet destekli monoteizm girişimi.</p><p>Freud'un 1939 tarihli son eseri Musa'nın bir Aton rahibi olduğunu öne sürdü. Tarihçilerin çoğu bunu reddeder; ancak tartışma akademide canlılığını korur.</p>",
-    meta: [{ k: 'Dönem', v: 'MÖ ~3100–30' }, { k: 'Kültür', v: 'Antik Mısır' }, { k: 'Önem', v: 'Monoteizm Tartışması' }],
-    sources: [
-      { text: 'Sigmund Freud — Moses and Monotheism (1939)', url: 'https://www.gutenberg.org/ebooks/1276' },
-      { text: 'Jan Assmann — Moses the Egyptian (Harvard UP, 1997)', url: 'https://www.hup.harvard.edu' },
-      { text: 'Metropolitan Museum — Egyptian Religion', url: 'https://www.metmuseum.org/toah/hd/egrl/hd_egrl.htm' }
-    ]
-  },
-  mkultra: {
-    cat: 'Komplo Teorileri · Belgelenmiş Vaka',
-    title: 'MKUltra: Komplo Teorisinden Tarihsel Gerçeğe',
-    body: "<p>MKUltra, CIA'nın 1953–1973 yılları arasında yürüttüğü gizli zihin kontrolü programıdır. 150'den fazla alt proje, büyük bölümü rıza alınmadan gerçekleştirilen deneyleri kapsıyordu.</p><p>1977 Frank Church Komitesi soruşturması programı resmi kayıtlara geçirdi. MKUltra, komplo teorisinin araştırmacı çabayla kanıtlanmış olguya dönüştüğünün en çarpıcı örneğidir.</p>",
-    meta: [{ k: 'Dönem', v: '1953–1973' }, { k: 'Kaynak', v: 'ABD Senato Kayıtları' }, { k: 'Güvenilirlik', v: 'Kanıtlanmış' }],
-    sources: [
-      { text: 'ABD Senatosu — Church Committee Report (1977)', url: 'https://www.intelligence.senate.gov/sites/default/files/94755_II.pdf' },
-      { text: 'CIA FOIA — MKUltra Belgeleri', url: 'https://www.cia.gov/readingroom/search/site/mkultra' },
-      { text: 'John Marks — The Search for the Manchurian Candidate (1979)', url: 'https://www.worldcat.org' }
-    ]
-  },
-  haarp: {
-    cat: 'Komplo Teorileri · Teknoloji',
-    title: 'HAARP: İyonosfer Araştırması mı, İklim Silahı mı?',
-    body: "<p>HAARP, Alaska'da iyonosfer araştırması yapan bir tesistir. 1993'te kurulmuş, 2015'te Alaska Üniversitesi'ne devredilmiştir.</p><p>Yaygın teoriler deprem tetikleme ve hava modifikasyonunu öne sürer. Tesisin 3,6 megawattlık gücü jeolojik ölçekte anlamsızdır. Bununla birlikte, hava modifikasyon programları onlarca ülkede gerçekten uygulanmaktadır.</p>",
-    meta: [{ k: 'Konum', v: 'Gakona, Alaska' }, { k: 'Kuruluş', v: '1993' }, { k: 'Güvenilirlik', v: 'Büyük Ölçüde Çürütüldü' }],
-    sources: [
-      { text: 'HAARP — University of Alaska Fairbanks', url: 'https://haarp.gi.alaska.edu' },
-      { text: 'Popular Science — "What HAARP Is, and Everything It Isn't"', url: 'https://www.popsci.com' },
-      { text: 'WMO — Weather Modification Activities', url: 'https://www.wmo.int' }
-    ]
-  },
-  echelon: {
-    cat: 'Komplo Teorileri · Gözetim',
-    title: 'Echelon: Küresel Dinleme Ağı',
-    body: "<p>Echelon, UKUSA ittifakının (ABD, İngiltere, Kanada, Avustralya, NZ) işlettiği küresel sinyal istihbarat ağıdır. 1999'da Avustralya Başbakanı varlığını teyit etti; Avrupa Parlamentosu ekonomik casusluk kullanımını belgeledi.</p><p>2013 Snowden belgeleri bu gözetim mimarisinin gerçek boyutlarını ortaya koydu.</p>",
-    meta: [{ k: 'Dönem', v: '1960–günümüz' }, { k: 'Aktörler', v: 'UKUSA İttifakı' }, { k: 'Güvenilirlik', v: 'Doğrulandı (1999+)' }],
-    sources: [
-      { text: 'Avrupa Parlamentosu — ECHELON Raporu (2001)', url: 'https://www.europarl.europa.eu/sides/getDoc.do?pubRef=-//EP//TEXT+REPORT+A5-2001-0264+0+DOC+XML+V0//EN' },
-      { text: 'The Guardian — Snowden Belgeleri Arşivi', url: 'https://www.theguardian.com/us-news/the-nsa-files' },
-      { text: 'James Bamford — Body of Secrets (2002)', url: 'https://www.worldcat.org' }
-    ]
-  },
-  simya: {
-    cat: 'Okültizm · Bilim Tarihi',
-    title: 'Simya: Kurşundan Altına, Maddeden Ruha',
-    body: "<p>Simya, Helenistik Mısır'dan Rönesans Avrupası'na uzanan 1500 yıllık entelektüel gelenektir. Newton'ın simya notları Cambridge kütüphanesine ancak 20. yüzyılda kazandırıldı.</p><p>Carl Jung simyayı bilinçdışı dönüşümün — bireyleşmenin — sembolik haritası olarak okudu. Bu yorumun kültürel etkisi günümüze dek sürmektedir.</p>",
-    meta: [{ k: 'Köken', v: 'Helenistik Mısır' }, { k: 'Alan', v: 'Proto-kimya / Felsefe' }, { k: 'Miras', v: 'Modern Kimya' }],
-    sources: [
-      { text: "C.G. Jung — Psychology and Alchemy (1944)", url: 'https://www.worldcat.org' },
-      { text: "Lawrence Principe — The Secrets of Alchemy (Univ. of Chicago, 2013)", url: 'https://press.uchicago.edu/ucp/books/book/chicago/S/bo14383808.html' },
-      { text: "Newton's Alchemical Papers — Cambridge Digital Library", url: 'https://cudl.lib.cam.ac.uk/collections/newton' }
-    ]
-  },
-  kabala: {
-    cat: 'Okültizm · Yahudi Mistisizmi',
-    title: "Kabala ve Sefirot: Varoluşun Haritası",
-    body: "<p>Kabala, 12. yüzyıldan itibaren sistematik hale gelen Yahudi mistik geleneğidir. <em>Etz Chaim</em> (Yaşam Ağacı) on sefirot ve yirmi iki yol üzerine kuruludur; her sefirot Tanrı'nın bir niteliğini temsil eder.</p><p>16. yüzyıldan itibaren Hermetik gelenek bu sistemi Yahudi sınırlarının çok ötesine taşıdı; Crowley'den Wicca'ya pek çok okült sistem bu yapıyı temel referans olarak kullanır.</p>",
-    meta: [{ k: 'Köken', v: '12–13. yy. İspanya' }, { k: 'Ana Metin', v: 'Zohar' }, { k: 'Alan', v: 'Mistisizm / Felsefe' }],
-    sources: [
-      { text: 'Gershom Scholem — Kabbalah (1974)', url: 'https://www.worldcat.org' },
-      { text: 'Zohar — Daniel Matt Çevirisi (Stanford UP)', url: 'https://www.sup.org/books/title/?id=1747' },
-      { text: 'Jewish Virtual Library — Kabbalah', url: 'https://www.jewishvirtuallibrary.org/kabbalah' }
-    ]
-  },
-  'altin-oran': {
-    cat: 'Okültizm · Matematik · Semboloji',
-    title: 'Φ: Altın Oran ve Kutsal Geometri',
-    body: "<p>Φ (phi ≈ 1.6180…) irrasyonel matematiksel bir sabittir. Fibonacci dizisinin oranları bu değere yakınsar. Parthenon'dan Leonardo'ya pek çok eserde kullanımı iddia edilir; ancak bazı iddialar ölçüm seçimlerinden kaynaklanan önyargı içerir.</p><p>Doğada Φ gerçekten belirgindir: çiçek tohumları, kabuk sarmalları. Bu örüntüler biyomekanik kısıtlamalardan kaynaklanır; 'evrenin şifresi' yorumu ise metafirik bir adımdır.</p>",
-    meta: [{ k: 'Alan', v: 'Matematik / Sanat Tarihi' }, { k: 'Değer', v: '≈ 1.6180339...' }, { k: 'Durum', v: 'Kısmen Doğrulanmış' }],
-    sources: [
-      { text: 'Mario Livio — The Golden Ratio (2002)', url: 'https://www.worldcat.org' },
-      { text: "Keith Devlin — 'The Myth That Will Not Go Away' (MAA, 2007)", url: 'https://www.maa.org/external_archive/devlin/devlin_05_07.html' },
-      { text: 'Ron Knott — Fibonacci Numbers & the Golden Section', url: 'https://r.knott.surrey.ac.uk/Fibonacci/fib.html' }
-    ]
-  }
-};
-
-
-// ── MODAL LOGIC ──────────────────────────────────
-const overlay    = document.getElementById('articleModal');
-const modalCat   = document.getElementById('modalCat');
-const modalTitle = document.getElementById('modalTitle');
-const modalBody  = document.getElementById('modalBody');
-const modalClose = document.getElementById('modalClose');
-const modalBox   = document.getElementById('modalBox');
-let lastFocused  = null;
-
-function closeModal() {
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
-  lastFocused?.focus();
-}
-
-document.addEventListener('click', e => {
-  const trigger = e.target.closest('[data-modal]');
-  if (trigger) { e.preventDefault(); openModal(trigger.dataset.modal); return; }
-  if (e.target === overlay) closeModal();
-});
-
-document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); return; }
-  if ((e.key === 'Enter' || e.key === ' ') && e.target.dataset?.modal) {
-    e.preventDefault();
-    openModal(e.target.dataset.modal);
-  }
-});
-
-modalClose.addEventListener('click', closeModal);
-
-// Focus trap
-modalBox.addEventListener('keydown', e => {
-  if (e.key !== 'Tab') return;
-  const focusable = [...modalBox.querySelectorAll('button, [href], [tabindex]:not([tabindex="-1"])')];
-  const first = focusable[0], last = focusable[focusable.length - 1];
-  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-});
-
-// ── 5. SEARCH / FILTER ──────────────────────────
+// ── 4. SEARCH / FILTER ──────────────────────────
 const searchInput = document.getElementById('indexSearch');
 const searchCount = document.getElementById('searchCount');
 const indexItems  = document.querySelectorAll('#indexList li');
-const total       = indexItems.length;
 
-function normalise(str) {
-  return str.toLowerCase()
+function norm(s) {
+  return (s||'').toLowerCase()
     .replace(/ı/g,'i').replace(/ğ/g,'g').replace(/ü/g,'u')
     .replace(/ş/g,'s').replace(/ö/g,'o').replace(/ç/g,'c');
 }
 
-function highlight(text, query) {
-  if (!query) return text;
-  const re = new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})`, 'gi');
-  return text.replace(re, '<mark class="il-highlight">$1</mark>');
-}
-
 searchInput?.addEventListener('input', () => {
-  const raw = searchInput.value.trim();
-  const q   = normalise(raw);
+  const q = norm(searchInput.value.trim());
   let shown = 0;
-
   indexItems.forEach(li => {
-    const name    = li.querySelector('.il-name');
-    const terms   = normalise(li.dataset.terms || '') + ' ' + normalise(name.textContent);
-    const matches = !q || terms.includes(q);
-    li.classList.toggle('hidden', !matches);
-    if (matches) {
-      shown++;
-      name.innerHTML = highlight(name.textContent, raw);
-    } else {
-      name.textContent = name.textContent; // reset
-    }
+    const name  = li.querySelector('.il-name');
+    const terms = norm(li.dataset.terms + ' ' + name.textContent);
+    const ok    = !q || terms.includes(q);
+    li.classList.toggle('hidden', !ok);
+    if (ok) shown++;
+    // reset highlight
+    name.textContent = name.textContent;
   });
-
-  searchCount.textContent = q
-    ? `${shown} / ${total} madde`
-    : '';
+  if (searchCount) {
+    searchCount.textContent = q ? `${shown} / ${indexItems.length} madde` : '';
+  }
 });
 
-// ── 6. SHARE BUTTONS ────────────────────────────
-let currentArticleId = null;
+// ── 5. ARTICLES DATA ────────────────────────────
+const ARTICLES = {
+  anunnaki: {
+    cat: 'Antik Mitoloji · Sümeroloji',
+    title: 'Anunnaki: Tanrılar mı, Uzaylılar mı?',
+    body: `<p>Sümer çivi yazılarında geçen <em>Anunnaki</em> terimi dilbilimsel olarak "yüksekten inenler" ya da "gökyüzü tanrısının soyu" biçiminde çevrilir. Ana akım Sümeroloji bu varlıkları Mezopotamya panteonunun büyük tanrıları — özellikle yeraltı dünyasıyla ilişkili kozmik güçler — olarak tanımlar.</p>
+    <p>Zecharia Sitchin'in 1976 tarihli <em>The Twelfth Planet</em> kitabıyla başlayan serisi, bu metinleri Nibiru adlı gezegendan gelen uzaylı bir ırkın kanıtı olarak okur; insanlığın altın madenciliği için genetik olarak tasarlandığını öne sürer. Akademik dilbilimciler ve Sümerolog uzmanlar bu çevirileri sistematik hatalarla dolu bularak reddeder. Sitchin'in metinlerde asla bulunmayan "roketi" ve "uzay gemisini" gördüğü sözcükler, standart sözlüklerde bambaşka anlama gelir.</p>
+    <p>Kesin olan: Anunnaki metinleri MÖ 3. binyıla ait gerçek belgelerdir. Nippur, Ur ve Lagaş kazılarında bulunan tabletlerin büyük çoğunluğu British Museum ve Penn Museum koleksiyonlarında mevcuttur. Bu metinlerin nasıl okunacağı sorusu ise yorumsal bir tartışma olmayı sürdürmektedir.</p>`,
+    meta: [{ k:'Dönem', v:'MÖ ~3000' }, { k:'Kaynak', v:'Sümer Çivi Yazıları' }, { k:'Güvenilirlik', v:'Tartışmalı' }],
+    sources: [
+      { text:'Thorkild Jacobsen — Treasures of Darkness (1976)', url:'https://www.worldcat.org/title/treasures-of-darkness' },
+      { text:'Michael S. Heiser — Sitchin Is Wrong', url:'https://www.sitchiniswrong.com' },
+      { text:'British Museum — Sümer Koleksiyonu', url:'https://www.britishmuseum.org/collection' }
+    ]
+  },
+  atlantis: {
+    cat: 'Kayıp Medeniyetler · Antik Felsefe',
+    title: "Atlantis: Platon'un Kayıp Kıtası",
+    body: `<p>Atlantis anlatısı MÖ yaklaşık 360'larda Platon'un <em>Timaios</em> ve <em>Kritias</em> diyaloglarında ortaya çıkar. Anlatıya göre Herkül Sütunları'nın (bugünkü Cebelitarık Boğazı) ötesinde konumlanan, güçlü bir deniz imparatorluğu, Atina tarafından yenilgiye uğratıldıktan kısa süre sonra tek bir günde suların altında kalır.</p>
+    <p>Günümüz araştırmacıları üç ana yaklaşım benimser: <strong>Felsefi alegori tezi</strong> — Platon'un ideal devlet ile çöküşü anlatmak için kurgusal bir örnek oluşturduğu görüşü, en çok akademik desteği bulan yorumdur. <strong>Thera hipotezi</strong> — MÖ ~1600'de gerçekleşen Santorini patlaması ve ardından gelen Minos uygarlığının çöküşünün mitik bellekte Atlantis'e dönüştüğü savı. <strong>Gerçek uygarlık tezi</strong> — Graham Hancock gibi isimlerin savunduğu, günümüzden 12.000 yıl önce var olan gelişmiş bir uygarlığın izlerini taşıdığı görüşü.</p>
+    <p>Jeolojik olarak Atlas Okyanusu'nda kıtasal çöküşü destekleyen bir yapı tespit edilmemiştir. Yine de Atlantis, Batı kültürel belleğinde "kayıp altın çağ" arketipinin en güçlü ifadesi olmayı sürdürür.</p>`,
+    meta: [{ k:'Kaynak', v:'Platon (MÖ ~360)' }, { k:'Kategori', v:'Mitoloji / Arkeoloji' }, { k:'Durum', v:'Allegorik veya Mitik' }],
+    sources: [
+      { text:'Platon — Timaios & Kritias (İng. Çev. Jowett)', url:'https://www.gutenberg.org/ebooks/1572' },
+      { text:'Encyclopedia Britannica — Atlantis', url:'https://www.britannica.com/place/Atlantis-legendary-island' },
+      { text:'Galanopoulos & Bacon — Atlantis: The Truth Behind the Legend (1969)', url:'https://www.worldcat.org' }
+    ]
+  },
+  ra: {
+    cat: 'Antik Mitoloji · Mısır Dini',
+    title: 'Ra Kültü, Aton ve Monoteizmin Kökeni',
+    body: `<p>Ra (ya da Re), Antik Mısır'ın baş güneş tanrısıdır. MÖ 3. binyıldan itibaren Heliopolis merkezli Ra teolojisi Mısır dini yaşamına egemen oldu. Günlük tekne yolculuğunda Ra hem var oluşu sürdürür hem de her gece yılan Apep'le ölümüne savaşır; sabah yeniden doğarak düzeni — Maat'ı — ayakta tutar.</p>
+    <p>MÖ 14. yüzyılda Firavun IV. Amenhotep adını <strong>Akhenaton</strong> olarak değiştirdi ve tüm tanrıların yerini tek bir güneş diski olan <strong>Aton</strong>'a bırakmasını emretti. Tapınaklar kapatıldı, tanrı isimleri kazındı. Bu hamle tarihte kayıtlı ilk devlet destekli monoteizm girişimi olarak kabul edilmektedir. Akhenaton'un ölümünün ardından oğlu Tutankhamun çok tanrılı sistemi restore etti.</p>
+    <p>Sigmund Freud 1939 tarihli son eseri <em>Moses and Monotheism</em>'de Musa'nın aslında Aton inancını taşıyan bir Mısırlı rahip olduğunu öne sürdü. Jan Assmann gibi tarih-din araştırmacıları bu fikri derinleştirdi; ancak tarihçilerin büyük çoğunluğu doğrudan bir bağlantıyı reddeder. Tartışma güncelliğini korur.</p>`,
+    meta: [{ k:'Dönem', v:'MÖ ~3100–30' }, { k:'Kültür', v:'Antik Mısır' }, { k:'Önem', v:'Monoteizm Tartışması' }],
+    sources: [
+      { text:'Sigmund Freud — Moses and Monotheism (1939)', url:'https://www.gutenberg.org/ebooks/1276' },
+      { text:'Jan Assmann — Moses the Egyptian (Harvard UP, 1997)', url:'https://www.hup.harvard.edu' },
+      { text:'Metropolitan Museum — Ancient Egyptian Religion', url:'https://www.metmuseum.org/toah/hd/egrl/hd_egrl.htm' }
+    ]
+  },
+  mkultra: {
+    cat: 'Komplo Teorileri · Belgelenmiş Vaka',
+    title: 'MKUltra: Teoriden Senato Tutanağına',
+    body: `<p>MKUltra, CIA'nın 1953–1973 yılları arasında yürüttüğü gizli zihin kontrolü araştırma programıdır. Resmi belgelere göre program; LSD deneyleri, hipnoz, elektrokonvülsif terapi, uyku yoksunluğu ve psikolojik işkenceyi kapsayan 150'den fazla alt projeden oluşuyordu. Deneylerin büyük çoğunluğu — mahkumlar, psikiyatri hastaları, askerler ve farkında olmayan siviller dahil — rıza alınmadan gerçekleştirildi.</p>
+    <p>1973'te CIA Direktörü Richard Helms, Watergate soruşturmasının yaklaştığını sezince belgelerin büyük bölümünü imha ettirdi. Hayatta kalan 20.000 dosya, 1977'de bir Freedom of Information Act başvurusunun ardından gün yüzüne çıktı. Aynı yıl Senator Edward Kennedy başkanlığında gerçekleştirilen Senato duruşmalarında CIA yetkilileri tanıklık etti.</p>
+    <p>MKUltra, "komplo teorisi" kavramının sistematik araştırma ve gazetecilik yoluyla kanıtlanmış olgulara dönüşebileceğinin ders kitabı örneğidir. Program bugün hâlâ benzer devlet programlarına ilişkin şüpheciliğin meşru tarihsel referansı olarak kullanılmaktadır.</p>`,
+    meta: [{ k:'Dönem', v:'1953–1973' }, { k:'Kaynak', v:'ABD Senato Kayıtları' }, { k:'Güvenilirlik', v:'Kanıtlanmış' }],
+    sources: [
+      { text:'ABD Senatosu — Church Committee Report (1977)', url:'https://www.intelligence.senate.gov/sites/default/files/94755_II.pdf' },
+      { text:'CIA FOIA — MKUltra Belgeleri', url:'https://www.cia.gov/readingroom/search/site/mkultra' },
+      { text:'John Marks — The Search for the Manchurian Candidate (1979)', url:'https://www.worldcat.org' }
+    ]
+  },
+  haarp: {
+    cat: 'Komplo Teorileri · Teknoloji',
+    title: 'HAARP: İyonosfer Silahı mı, Araştırma Tesisi mi?',
+    body: `<p>HAARP (High-frequency Active Auroral Research Program), Alaska'nın Gakona kasabasında 180 anten dizisinden oluşan iyonosfer araştırma tesisidir. 1993'te ABD Hava Kuvvetleri ve Donanması'nın ortak finansmanıyla kurulmuş; 2015'te Alaska Üniversitesi'ne devredilmiş ve tamamen kamuya açık bir araştırma kurumuna dönüştürülmüştür. Temel amacı yüksek frekanslı radyo dalgalarının iyonosferdeki davranışını incelemektir.</p>
+    <p>Yaygın teoriler HAARP'ın deprem tetikleme, kasırca oluşturma, kitle zihin kontrolü ve füze savunma amaçlı kullanıldığını öne sürer. Jeofizik açısından değerlendirildiğinde tesisin maksimum 3,6 megawattlık gücü, orta büyüklükte bir kasırcanın saniyede serbest bıraktığı enerjinin yaklaşık on binde biri kadardır. Bu ölçek farkı, iklimsel etki teorilerini fiziksel olarak olanaksız kılar.</p>
+    <p>Bununla birlikte, hava modifikasyonu teknolojileri gerçek ve tartışmalı bir alandır: Bulut tohumlama programları onlarca ülkede resmi olarak uygulanmaktadır. 1977 ENMOD Sözleşmesi, savaş amaçlı çevre modifikasyonunu uluslararası hukukta yasaklamıştır — bu yasağın varlığı, söz konusu teknolojilerin pratikte var olduğunun zımni kabulüdür.</p>`,
+    meta: [{ k:'Konum', v:'Gakona, Alaska' }, { k:'Kuruluş', v:'1993' }, { k:'Güvenilirlik', v:'Büyük Ölçüde Çürütüldü' }],
+    sources: [
+      { text:'HAARP Resmi Sitesi — UAF', url:'https://haarp.gi.alaska.edu' },
+      { text:'Popular Science — "What HAARP Is, and Everything It Isn't"', url:'https://www.popsci.com' },
+      { text:'WMO — Weather Modification Programme', url:'https://www.wmo.int' }
+    ]
+  },
+  echelon: {
+    cat: 'Komplo Teorileri · Gözetim',
+    title: 'Echelon: 40 Yıl İnkâr Edilen Dinleme Ağı',
+    body: `<p>Echelon, "Beş Göz" olarak da bilinen UKUSA İstihbarat İttifakı'nın (ABD, İngiltere, Kanada, Avustralya, Yeni Zelanda) işlettiği küresel sinyal istihbarat ağıdır. Ağ 1960'larda Soğuk Savaş döneminde kurulmuş; uydu iletişimlerini, kablo trafiğini ve kısa dalga yayınlarını sistematik biçimde tarayan otomatik istasyonlardan oluşmaktadır.</p>
+    <p>1988'de gazeteci Duncan Campbell Echelon'un varlığını belgeleyen ilk ayrıntılı raporu yayımladı. Hükümetler onlarca yıl inkâr etti ya da sessiz kaldı; bazı yetkililer konuyu "komplo teorisi" olarak nitelendirdi. 1999'da Avustralya Başbakanı programın varlığını ilk kez dolaylı olarak teyit etti. Avrupa Parlamentosu aynı yıl Echelon'un Avrupa şirketlerine yönelik ekonomik casusluk amacıyla kullanıldığını belgeleyen kapsamlı bir rapor yayımladı.</p>
+    <p>2013'te Edward Snowden'ın sızdırdığı belgeler PRISM ve XKeyscore programlarıyla birlikte bu mimarinin gerçek boyutunu gözler önüne serdi. Echelon vakası; devlet inkârının nasıl kurumsallaştığının ve araştırmacı gazeteciliğin demokratik hesap verebilirlik açısından taşıdığı kritik önemin somut bir kanıtıdır.</p>`,
+    meta: [{ k:'Dönem', v:'1960–günümüz' }, { k:'Aktörler', v:'UKUSA / Beş Göz' }, { k:'Güvenilirlik', v:'Doğrulandı (1999+)' }],
+    sources: [
+      { text:'Avrupa Parlamentosu — ECHELON Raporu (2001)', url:'https://www.europarl.europa.eu/sides/getDoc.do?pubRef=-//EP//TEXT+REPORT+A5-2001-0264+0+DOC+XML+V0//EN' },
+      { text:'The Guardian — Snowden NSA Belgeleri', url:'https://www.theguardian.com/us-news/the-nsa-files' },
+      { text:'Duncan Campbell — "Somebody's Listening" (New Statesman, 1988)', url:'https://www.worldcat.org' }
+    ]
+  },
+  simya: {
+    cat: 'Okültizm · Bilim Tarihi',
+    title: 'Simya: Modern Kimyanın Karanlık Atası',
+    body: `<p>Simya, Helenistik Mısır'dan (MÖ 3. yy.) Orta Çağ İslam dünyasına, oradan Rönesans Avrupası'na uzanan yaklaşık 1500 yıllık entelektüel gelenektir. Zahiri amacı metalleri dönüştürmek — kurşunu altına çevirmek ve ölümsüzlük iksiri elde etmek — olsa da pek çok tarihçi gerçek işlevinin deneysel kimyanın gelişimi ve mistik öz-dönüşüm pratiği olduğu kanısındadır.</p>
+    <p>Modern kimyanın simyadan beslendiği tartışmasız bir tarihsel gerçektir. Robert Boyle, kimyanın babası sayılmasına rağmen aktif bir simyacıydı. Isaac Newton'un simyaya ayırdığı notlar, fizik ve matematiğe ayırdığı notlardan <em>daha fazladır</em>; bu belgeler Cambridge Üniversitesi kütüphanesinde dijital olarak mevcuttur. Elementlerin sistematik sınıflandırılması, asit-baz kimyası, distilasyon ve çöktürme tekniklerinin kökleri simya laboratuvarlarına dayanır.</p>
+    <p>Carl Jung, 20. yüzyılda simyayı derinpsikolojik bir perspektiften yeniden yorumladı: metallerin dönüşümünü bilinçdışının simgesel dili olarak okudu; "Philosophorum Taşı"nı bireyleşme sürecinin metaforu olarak tanımladı. Bu yorum simyayı kültür tarihinde kalıcı bir yer kazandırdı.</p>`,
+    meta: [{ k:'Köken', v:'Helenistik Mısır' }, { k:'Alan', v:'Proto-kimya / Felsefe' }, { k:'Miras', v:'Modern Kimya' }],
+    sources: [
+      { text:'Lawrence Principe — The Secrets of Alchemy (Univ. of Chicago, 2013)', url:'https://press.uchicago.edu/ucp/books/book/chicago/S/bo14383808.html' },
+      { text:"Newton's Alchemical Papers — Cambridge Digital Library", url:'https://cudl.lib.cam.ac.uk/collections/newton' },
+      { text:'C.G. Jung — Psychology and Alchemy (1944, CW 12)', url:'https://www.worldcat.org' }
+    ]
+  },
+  kabala: {
+    cat: 'Okültizm · Yahudi Mistisizmi',
+    title: "Kabala ve Sefirot: Varoluşun On Boyutu",
+    body: `<p>Kabala, Yahudi mistik geleneğinin 12. yüzyıldan itibaren Güney Fransa (Provence) ve İspanya'da sistematik biçimde kristalleşen koludur. Merkezi metni, 13. yüzyılda İspanya'da Musa de León tarafından yayımlanan <em>Zohar</em>'dır (Işıltı Kitabı). Kabalistik kozmolojinin temel haritası olan <em>Etz Chaim</em> (Yaşam Ağacı), on <em>sefirot</em> ve bunları birbirine bağlayan yirmi iki yol üzerine kuruludur.</p>
+    <p>Her sefirot Tanrı'nın farklı bir tezahür katmanını temsil eder: <strong>Keter</strong> (Taç / Saf Bilinç), <strong>Hokhmah</strong> (Bilgelik), <strong>Binah</strong> (Anlayış), <strong>Chesed</strong> (Sevgi), <strong>Gevurah</strong> (Güç), <strong>Tiferet</strong> (Güzellik / Denge), <strong>Netzach</strong> (Zafer), <strong>Hod</strong> (İhtişam), <strong>Yesod</strong> (Temel) ve <strong>Malkuth</strong> (Krallık / Madde Alemi). Bu yapı hem kozmik düzenin hem de insan ruhunun katmanlarının haritasıdır.</p>
+    <p>16. yüzyıldan itibaren Hermetik gelenek Sefirot ağacını Yahudi sınırlarının çok ötesine taşıdı. Pico della Mirandola'dan Aleister Crowley'e, modern Wicca'dan Golden Dawn Cemiyeti'ne kadar pek çok okült sistem bu yapıyı temel referans çerçevesi olarak benimser. Günümüzde ise Madonna gibi pop kültür figürleri aracılığıyla küresel bir marka haline gelmiştir.</p>`,
+    meta: [{ k:'Köken', v:'12–13. yy. İspanya' }, { k:'Ana Metin', v:'Zohar (~1280)' }, { k:'Alan', v:'Mistisizm / Felsefe' }],
+    sources: [
+      { text:'Gershom Scholem — Kabbalah (1974, Keter Publishing)', url:'https://www.worldcat.org' },
+      { text:'Zohar — Daniel Matt Çevirisi (Stanford UP, 2004)', url:'https://www.sup.org/books/title/?id=1747' },
+      { text:'Jewish Virtual Library — Kabbalah', url:'https://www.jewishvirtuallibrary.org/kabbalah' }
+    ]
+  },
+  'altin-oran': {
+    cat: 'Okültizm · Matematik · Semboloji',
+    title: 'Φ: Altın Oran, Doğa ve Kutsal Geometri',
+    body: `<p>Φ (phi ≈ 1,6180339…), bir doğruyu "büyük parçanın küçük parçaya oranı, bütünün büyük parçaya oranına eşit olacak şekilde" bölen irrasyonel matematiksel sabittir. Bu oran, Fibonacci dizisinin (0, 1, 1, 2, 3, 5, 8, 13, 21…) ardışık terimleri arasındaki oran olarak kendiliğinden ortaya çıkar.</p>
+    <p>Pek çok kaynak altın oranın Büyük Piramit'te, Parthenon'da ve Leonardo da Vinci'nin eserlerinde kasıtlı kullanıldığını ileri sürer. Matematiksel analizler bu iddiaların bir bölümünün gerçek, bir bölümünün ise ölçüm seçimlerinden kaynaklanan <em>confirmation bias</em> içerdiğini göstermektedir. Matematikçi Keith Devlin'in araştırmaları, pek çok "altın oran örneği"nin aslında yaklaşık oran eşleştirmelerinden ibaret olduğunu ortaya koymuştur.</p>
+    <p>Bununla birlikte, Φ'nin doğadaki varlığı gerçek ve fiziksel olarak açıklanabilirdir: ayçiçeği tohumlarının çift yönlü sarmalları (21 ve 34, ya da 34 ve 55 — ardışık Fibonacci sayıları), deniz kabuklarının logaritmik büyüme sarmalı, bitkilerdeki yaprak dizilim açısı (fillotaksi) doğrudan büyüme biyomekaniğinin verimlilik kısıtlamalarından kaynaklanır. "Evrenin tasarım şifresi" yorumu ise bu matematiksel gerçeğin ötesine geçen felsefi bir adımdır.</p>`,
+    meta: [{ k:'Alan', v:'Matematik / Sanat Tarihi' }, { k:'Değer', v:'≈ 1,6180339...' }, { k:'Durum', v:'Kısmen Doğrulanmış' }],
+    sources: [
+      { text:'Mario Livio — The Golden Ratio (2002, Broadway Books)', url:'https://www.worldcat.org' },
+      { text:"Keith Devlin — 'The Myth That Will Not Go Away' (MAA, 2007)", url:'https://www.maa.org/external_archive/devlin/devlin_05_07.html' },
+      { text:'Ron Knott — Fibonacci & the Golden Section', url:'https://r.knott.surrey.ac.uk/Fibonacci/fib.html' }
+    ]
+  }
+};
+
+// ── 6. MODAL ────────────────────────────────────
+const overlay     = document.getElementById('articleModal');
+const modalBox    = document.getElementById('modalBox');
+const modalCatEl  = document.getElementById('modalCat');
+const modalTitleEl= document.getElementById('modalTitle');
+const modalBodyEl = document.getElementById('modalBody');
+const modalCloseEl= document.getElementById('modalClose');
+let lastFocused   = null;
+let currentId     = null;
 
 function openModal(id) {
-  currentArticleId = id;
   const data = ARTICLES[id];
   if (!data) return;
+  currentId   = id;
   lastFocused = document.activeElement;
-  modalCat.textContent   = data.cat;
-  modalTitle.textContent = data.title;
+
+  modalCatEl.textContent   = data.cat;
+  modalTitleEl.textContent = data.title;
 
   const metaHtml = data.meta.map(m =>
-    `<div class="modal-meta-item">${m.k}<span>${m.v}</span></div>`
+    '<div class="modal-meta-item">' + m.k + '<span>' + m.v + '</span></div>'
   ).join('');
 
-  // Sources block
   let sourcesHtml = '';
-  if (data.sources?.length) {
+  if (data.sources && data.sources.length) {
     const items = data.sources.map(s =>
-      `<li><a href="${s.url}" target="_blank" rel="noopener">${s.text}</a></li>`
+      '<li><a href="' + s.url + '" target="_blank" rel="noopener">' + s.text + '</a></li>'
     ).join('');
-    sourcesHtml = `
-      <div class="modal-sources">
-        <div class="modal-sources-title">Kaynakça & İleri Okuma</div>
-        <ul class="source-list">${items}</ul>
-      </div>`;
+    sourcesHtml = '<div class="modal-sources"><div class="modal-sources-title">Kaynakça & İleri Okuma</div><ul class="source-list">' + items + '</ul></div>';
   }
 
-  modalBody.innerHTML    = data.body + `<div class="modal-meta">${metaHtml}</div>` + sourcesHtml;
+  modalBodyEl.innerHTML = data.body + '<div class="modal-meta">' + metaHtml + '</div>' + sourcesHtml;
+
   overlay.classList.add('open');
   document.body.style.overflow = 'hidden';
-  modalClose.focus();
+  setTimeout(() => modalCloseEl.focus(), 50);
 }
 
+function closeModal() {
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  if (lastFocused) lastFocused.focus();
+}
+
+// Open via click on any [data-modal] element
+document.body.addEventListener('click', function(e) {
+  const trigger = e.target.closest('[data-modal]');
+  if (trigger) {
+    e.preventDefault();
+    e.stopPropagation();
+    openModal(trigger.getAttribute('data-modal'));
+    return;
+  }
+  if (e.target === overlay) closeModal();
+});
+
+// Keyboard
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+});
+
+modalCloseEl.addEventListener('click', closeModal);
+
+// Focus trap
+modalBox.addEventListener('keydown', function(e) {
+  if (e.key !== 'Tab') return;
+  const focusable = Array.from(modalBox.querySelectorAll('button, a[href], [tabindex]:not([tabindex="-1"])'));
+  const first = focusable[0];
+  const last  = focusable[focusable.length - 1];
+  if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+  else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+});
+
+// ── 7. SHARE BUTTONS ────────────────────────────
 function flashBtn(btn, label) {
+  const orig = btn.textContent;
+  btn.textContent = label;
   btn.classList.add('copied');
-  const orig = btn.innerHTML;
-  btn.innerHTML = btn.innerHTML.replace(/>[^<]+$/, `>${label}`);
-  setTimeout(() => {
-    btn.innerHTML = orig;
-    btn.classList.remove('copied');
-  }, 2000);
+  setTimeout(() => { btn.textContent = orig; btn.classList.remove('copied'); }, 2000);
 }
 
-document.getElementById('btnCopyLink')?.addEventListener('click', () => {
-  const url = `${location.href.split('#')[0]}#madde-${currentArticleId}`;
-  navigator.clipboard.writeText(url).then(() =>
-    flashBtn(document.getElementById('btnCopyLink'), 'Kopyalandı ✓')
-  );
+document.getElementById('btnCopyLink').addEventListener('click', function() {
+  const url = window.location.origin + window.location.pathname + '#madde-' + (currentId || '');
+  navigator.clipboard.writeText(url).then(() => flashBtn(this, 'Kopyalandı ✓'));
 });
 
-document.getElementById('btnShareTwitter')?.addEventListener('click', () => {
-  const data = ARTICLES[currentArticleId];
-  if (!data) return;
-  const text = encodeURIComponent(`"${data.title}" — ARCANA Ansiklopedisi`);
-  const url  = encodeURIComponent(location.href);
-  window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank', 'noopener,noreferrer,width=600,height=400');
+document.getElementById('btnShareTwitter').addEventListener('click', function() {
+  if (!currentId) return;
+  const data = ARTICLES[currentId];
+  const text = encodeURIComponent('"' + data.title + '" — ARCANA Ansiklopedisi');
+  const url  = encodeURIComponent(window.location.href);
+  window.open('https://twitter.com/intent/tweet?text=' + text + '&url=' + url, '_blank', 'noopener,width=600,height=400');
 });
 
-document.getElementById('btnCopyText')?.addEventListener('click', () => {
-  const data = ARTICLES[currentArticleId];
-  if (!data) return;
-  const plain = `${data.title}\n${data.cat}\nARCANA Ansiklopedisi — ${location.href}`;
-  navigator.clipboard.writeText(plain).then(() =>
-    flashBtn(document.getElementById('btnCopyText'), 'Kopyalandı ✓')
-  );
+document.getElementById('btnCopyText').addEventListener('click', function() {
+  if (!currentId) return;
+  const data = ARTICLES[currentId];
+  const plain = data.title + '\n' + data.cat + '\nARCANA Ansiklopedisi — ' + window.location.href;
+  navigator.clipboard.writeText(plain).then(() => flashBtn(this, 'Kopyalandı ✓'));
 });
 </script>
 
