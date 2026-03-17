@@ -3,164 +3,1544 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="ARCANA — Gizem, Mit ve Hakikat Ansiklopedisi: Kayıp medeniyetler, antik mitoloji, komplo teorileri ve okült semboller üzerine akademik perspektiften yazılar.">
 <title>ARCANA — Gizem, Mit ve Hakikat Ansiklopedisi</title>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Cinzel:wght@400;600;700&family=Cinzel+Decorative:wght@400;700&display=swap" rel="stylesheet">
 <style>
-/* ... (Stil bölümleriniz aynı kalıyor, ancak JS etkileşimi için birkaç ekleme yapıldı) ... */
+/* ══════════════════════════════════════════
+TOKENS
+══════════════════════════════════════════ */
 :root {
-  --ink: #0a0c10; --ink2: #111520; --navy: #0d1428; --navy2: #131c35;
-  --gold: #c8973a; --gold-light: #e4b96a; --gold-pale: #f2d9a0;
-  --gold-dim: rgba(200,151,58,0.18); --gold-ghost: rgba(200,151,58,0.07);
-  --silver: #8a9ab8; --silver-dim: #4a5570; --text: #c8cdd8;
-  --text-dim: #6a7590; --border: rgba(200,151,58,0.2);
-  --border2: rgba(200,151,58,0.08); --red-muted: #8b3a3a;
-  --f-display: 'Cinzel Decorative', serif; --f-heading: 'Cinzel', serif; --f-body: 'Cormorant Garamond', serif;
+--ink:        #0a0c10;
+--ink2:       #111520;
+--navy:       #0d1428;
+--navy2:      #131c35;
+--gold:       #c8973a;
+--gold-light: #e4b96a;
+--gold-pale:  #f2d9a0;
+--gold-dim:   rgba(200,151,58,0.18);
+--gold-ghost: rgba(200,151,58,0.07);
+--silver:     #8a9ab8;
+--silver-dim: #4a5570;
+--text:       #c8cdd8;
+--text-dim:   #6a7590;
+--border:     rgba(200,151,58,0.2);
+--border2:    rgba(200,151,58,0.08);
+--red-muted:  #8b3a3a;
+--f-display: 'Cinzel Decorative', serif;
+--f-heading: 'Cinzel', serif;
+--f-body:    'Cormorant Garamond', serif;
 }
+/* ══════════════════════════════════════════
+RESET & BASE
+══════════════════════════════════════════ */
 *, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
 html { scroll-behavior: smooth; font-size: 16px; }
-body { background: var(--ink); color: var(--text); font-family: var(--f-body); line-height: 1.75; overflow-x: hidden; min-height: 100vh; }
-.hidden { display: none !important; }
-
-/* Mevcut CSS kodlarınızın devamı buraya gelecek... */
-/* (Hız kazanmak için tasarım CSS'inizi koruduğunuzu varsayıyorum) */
-
-/* JS Fade / Reveal */
-.js-reveal { opacity: 0; transform: translateY(20px); transition: all 0.6s ease-out; }
-.js-reveal.visible { opacity: 1; transform: translateY(0); }
-
-/* Modal Styles */
-.modal-overlay {
-  position: fixed; inset: 0; background: rgba(5,8,16,0.95); z-index: 1000;
-  display: none; align-items: flex-start; justify-content: center; padding: 40px 20px;
-  overflow-y: auto; backdrop-filter: blur(8px);
+.js-fade { opacity: 0; transform: translateY(14px); transition: opacity 0.5s ease, transform 0.5s ease; }
+.js-fade.visible { opacity: 1; transform: none; }
+body {
+background: var(--ink);
+color: var(--text);
+font-family: var(--f-body);
+font-size: 1rem;
+line-height: 1.75;
+overflow-x: hidden;
+cursor: default;
+min-height: 100vh;
 }
-.modal-overlay.open { display: flex; }
-.modal { background: var(--navy); border: 1px solid var(--border); max-width: 760px; width: 100%; position: relative; padding: 40px; }
-.modal-close { position: absolute; top: 20px; right: 20px; background: none; border: 1px solid var(--border); color: var(--gold); cursor: pointer; padding: 5px 10px; }
+body::after {
+content: '';
+position: fixed; inset: 0;
+background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+opacity: 0.022;
+pointer-events: none;
+z-index: 9999;
+}
+a { color: inherit; text-decoration: none; }
+img { display: block; max-width: 100%; }
+.js-reveal:nth-child(2) { transition-delay: 0.07s; }
+.js-reveal:nth-child(3) { transition-delay: 0.14s; }
+.js-reveal:nth-child(4) { transition-delay: 0.21s; }
+/* ══════════════════════════════════════════
+SEARCH / FILTER BOX
+══════════════════════════════════════════ */
+.search-wrap { position: relative; margin-bottom: 14px; }
+.search-input {
+width: 100%;
+background: var(--ink2);
+border: 1px solid var(--border);
+color: var(--text);
+font-family: var(--f-body);
+font-size: 0.95rem;
+padding: 9px 36px 9px 14px;
+outline: none;
+transition: border-color 0.2s, box-shadow 0.2s;
+caret-color: var(--gold);
+}
+.search-input::placeholder { color: var(--silver-dim); font-style: italic; }
+.search-input:focus {
+border-color: var(--gold);
+box-shadow: 0 0 0 2px rgba(200,151,58,0.12);
+}
+.search-icon {
+position: absolute;
+right: 12px; top: 50%;
+transform: translateY(-50%);
+color: var(--silver-dim);
+font-size: 0.8rem;
+pointer-events: none;
+}
+.search-count {
+font-family: var(--f-heading);
+font-size: 0.5rem;
+letter-spacing: 0.2em;
+color: var(--silver-dim);
+margin-bottom: 10px;
+text-transform: uppercase;
+min-height: 1em;
+}
+.index-list li.hidden { display: none; }
+.il-highlight { color: var(--gold-light); background: rgba(200,151,58,0.15); border-radius: 2px; padding: 0 2px; }
+/* ══════════════════════════════════════════
+MODAL SOURCES & SHARE
+══════════════════════════════════════════ */
+.modal-sources {
+margin-top: 20px;
+padding-top: 18px;
+border-top: 1px solid var(--border2);
+}
+.modal-sources-title {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.35em;
+text-transform: uppercase;
+color: var(--gold);
+margin-bottom: 10px;
+}
+.source-list { list-style: none; }
+.source-list li {
+font-family: var(--f-body);
+font-size: 0.9rem;
+color: var(--text-dim);
+padding: 5px 0;
+border-bottom: 1px dotted var(--border2);
+display: flex;
+align-items: baseline;
+gap: 8px;
+}
+.source-list li:last-child { border-bottom: none; }
+.source-list li::before {
+content: '◈';
+color: var(--gold);
+font-size: 0.6rem;
+flex-shrink: 0;
+}
+.source-list a {
+color: var(--silver);
+transition: color 0.2s;
+text-decoration: underline;
+text-decoration-color: transparent;
+text-underline-offset: 3px;
+transition: color 0.2s, text-decoration-color 0.2s;
+}
+.source-list a:hover {
+color: var(--gold-light);
+text-decoration-color: var(--gold-light);
+}
+.modal-share {
+display: flex;
+align-items: center;
+gap: 10px;
+margin-top: 18px;
+padding-top: 16px;
+border-top: 1px solid var(--border2);
+flex-wrap: wrap;
+}
+.share-label {
+font-family: var(--f-heading);
+font-size: 0.52rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(--silver-dim);
+}
+.share-btn {
+background: var(--ink2);
+border: 1px solid var(--border);
+color: var(--silver-dim);
+font-family: var(--f-heading);
+font-size: 0.52rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+padding: 6px 14px;
+cursor: pointer;
+transition: all 0.2s;
+display: flex;
+align-items: center;
+gap: 6px;
+}
+.share-btn:hover {
+border-color: var(--gold);
+color: var(--gold);
+background: var(--gold-ghost);
+}
+.share-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.share-btn.copied {
+border-color: #4a9a4a;
+color: #6abf6a;
+background: rgba(74,154,74,0.08);
+}
+.share-btn svg { width: 12px; height: 12px; fill: currentColor; }
+/* ══════════════════════════════════════════
+ARTICLE MODAL
+══════════════════════════════════════════ */
+.modal-overlay {
+position: fixed; inset: 0;
+background: rgba(5,8,16,0.92);
+z-index: 1000;
+display: flex;
+align-items: flex-start;
+justify-content: center;
+padding: 40px 20px;
+overflow-y: auto;
+opacity: 0;
+pointer-events: none;
+transition: opacity 0.3s ease;
+backdrop-filter: blur(6px);
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+background: var(--navy);
+border: 1px solid var(--border);
+max-width: 760px;
+width: 100%;
+position: relative;
+transform: translateY(28px);
+transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+}
+.modal-overlay.open .modal { transform: none; }
+.modal-header {
+padding: 32px 36px 24px;
+border-bottom: 1px solid var(--border2);
+position: relative;
+}
+.modal-cat {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.4em;
+text-transform: uppercase;
+color: var(--gold);
+margin-bottom: 10px;
+}
+.modal-title {
+font-family: var(--f-heading);
+font-size: clamp(1.3rem, 3vw, 2rem);
+font-weight: 600;
+color: var(--gold-pale);
+letter-spacing: 0.05em;
+line-height: 1.2;
+padding-right: 40px;
+}
+.modal-close {
+position: absolute;
+top: 28px; right: 28px;
+background: none;
+border: 1px solid var(--border);
+color: var(--silver-dim);
+font-family: var(--f-heading);
+font-size: 0.7rem;
+letter-spacing: 0.2em;
+padding: 6px 12px;
+cursor: pointer;
+transition: color 0.2s, border-color 0.2s;
+}
+.modal-close:hover { color: var(--gold); border-color: var(--gold); }
+.modal-close:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.modal-body { padding: 28px 36px 36px; }
+.modal-body p {
+font-family: var(--f-body);
+font-size: 1.08rem;
+color: var(--text);
+line-height: 1.9;
+margin-bottom: 16px;
+text-align: justify;
+hyphens: auto;
+}
+.modal-body p:first-child::first-letter {
+font-family: var(--f-display);
+font-size: 3rem;
+color: var(--gold);
+float: left;
+line-height: 0.85;
+margin-right: 8px;
+margin-top: 6px;
+}
+.modal-meta {
+display: flex;
+gap: 24px;
+flex-wrap: wrap;
+padding-top: 20px;
+border-top: 1px solid var(--border2);
+margin-top: 8px;
+}
+.modal-meta-item {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--silver-dim);
+}
+.modal-meta-item span { color: var(--gold); margin-left: 6px; }
+.read-more-link {
+display: inline-flex;
+align-items: center;
+gap: 6px;
+margin-top: 12px;
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(--gold);
+cursor: pointer;
+border-bottom: 1px solid transparent;
+transition: border-color 0.2s, gap 0.2s;
+background: none;
+border: none;
+padding: 0;
+}
+.read-more-link:hover { border-bottom-color: var(--gold); gap: 10px; }
+.read-more-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+.section-anchor { scroll-margin-top: 56px; }
+/* ══════════════════════════════════════════
+MASTHEAD
+══════════════════════════════════════════ */
+.masthead {
+position: relative;
+background: var(--navy);
+border-bottom: 1px solid var(--border);
+overflow: hidden;
+padding: 56px 48px 44px;
+text-align: center;
+}
+.masthead-bg {
+position: absolute; inset: 0;
+background:
+radial-gradient(ellipse 80% 60% at 50% 0%, rgba(200,151,58,0.06) 0%, transparent 70%),
+radial-gradient(ellipse 40% 40% at 20% 100%, rgba(13,20,40,0.8) 0%, transparent 60%);
+pointer-events: none;
+}
+.masthead::before,
+.masthead::after {
+content: '';
+position: absolute; left: 48px; right: 48px;
+height: 1px;
+background: linear-gradient(90deg, transparent, var(--gold), var(--gold-light), var(--gold), transparent);
+opacity: 0.5;
+}
+.masthead::before { top: 20px; }
+.masthead::after  { bottom: 20px; }
+.masthead-eyebrow {
+font-family: var(--f-heading);
+font-size: 0.65rem;
+letter-spacing: 0.45em;
+color: var(--gold);
+text-transform: uppercase;
+margin-bottom: 16px;
+opacity: 0.7;
+}
+.masthead-title {
+font-family: var(--f-display);
+font-size: clamp(2.8rem, 7vw, 6rem);
+color: var(--gold-pale);
+letter-spacing: 0.12em;
+line-height: 1;
+text-shadow: 0 0 40px rgba(200,151,58,0.3), 0 2px 0 rgba(0,0,0,0.6);
+margin-bottom: 12px;
+animation: masthead-in 1.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes masthead-in {
+from { opacity:0; transform: translateY(18px) scale(0.98); }
+to   { opacity:1; transform: none; }
+}
+.masthead-sub {
+font-family: var(--f-body);
+font-size: 1.05rem;
+font-style: italic;
+color: var(--silver);
+letter-spacing: 0.05em;
+max-width: 520px;
+margin: 0 auto;
+line-height: 1.6;
+animation: masthead-in 1.6s 0.2s cubic-bezier(0.16,1,0.3,1) both;
+}
+.masthead-ornament {
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 20px;
+margin-top: 22px;
+animation: masthead-in 1.6s 0.4s cubic-bezier(0.16,1,0.3,1) both;
+}
+.orn-line { flex: 1; max-width: 120px; height: 1px; background: linear-gradient(90deg, transparent, var(--gold-dim)); }
+.orn-line.right { background: linear-gradient(270deg, transparent, var(--gold-dim)); }
+.orn-sym { color: var(--gold); font-size: 1.1rem; opacity: 0.6; }
+/* ══════════════════════════════════════════
+TOP NAV
+══════════════════════════════════════════ */
+.topnav {
+background: var(--ink2);
+border-bottom: 1px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: center;
+gap: 0;
+overflow-x: auto;
+position: sticky;
+top: 0;
+z-index: 100;
+backdrop-filter: blur(12px);
+}
+.topnav a {
+font-family: var(--f-heading);
+font-size: 0.62rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(--silver-dim);
+padding: 14px 22px;
+border-right: 1px solid var(--border2);
+transition: color 0.2s, background 0.2s;
+white-space: nowrap;
+position: relative;
+}
+.topnav a::after {
+content: '';
+position: absolute; bottom: 0; left: 50%; right: 50%;
+height: 2px;
+background: var(--gold);
+transition: left 0.25s, right 0.25s;
+}
+.topnav a:hover { color: var(--gold-light); }
+.topnav a:hover::after,
+.topnav a.active::after { left: 0; right: 0; }
+.topnav a.active { color: var(--gold); }
+/* ══════════════════════════════════════════
+LAYOUT
+══════════════════════════════════════════ */
+.page-wrap {
+max-width: 1380px;
+margin: 0 auto;
+padding: 52px 32px;
+display: grid;
+grid-template-columns: 1fr 320px;
+gap: 52px;
+}
+@media (max-width: 960px) { .page-wrap { grid-template-columns: 1fr; } }
+/* ══════════════════════════════════════════
+SECTION HEADERS
+══════════════════════════════════════════ */
+.section-label {
+display: flex;
+align-items: center;
+gap: 14px;
+margin-bottom: 28px;
+}
+.section-label-text {
+font-family: var(--f-heading);
+font-size: 0.6rem;
+letter-spacing: 0.4em;
+text-transform: uppercase;
+color: var(--gold);
+white-space: nowrap;
+}
+.section-label-line {
+flex: 1;
+height: 1px;
+background: linear-gradient(90deg, var(--border), transparent);
+}
+/* ══════════════════════════════════════════
+FEATURED ENTRY
+══════════════════════════════════════════ */
+.featured-entry {
+border: 1px solid var(--border);
+background: var(--navy);
+margin-bottom: 44px;
+position: relative;
+overflow: hidden;
+animation: fade-up 0.8s 0.1s both;
+}
+@keyframes fade-up {
+from { opacity:0; transform: translateY(24px); }
+to   { opacity:1; transform: none; }
+}
+.featured-entry-inner {
+display: grid;
+grid-template-columns: 1fr 1fr;
+min-height: 360px;
+}
+@media (max-width: 700px) { .featured-entry-inner { grid-template-columns: 1fr; } }
+.entry-visual {
+position: relative;
+background: var(--ink2);
+border-right: 1px solid var(--border);
+display: flex;
+align-items: center;
+justify-content: center;
+overflow: hidden;
+min-height: 280px;
+}
+.entry-visual svg { width: 220px; height: 220px; opacity: 0.85; }
+.entry-visual::before {
+content: '';
+position: absolute;
+width: 260px; height: 260px;
+background: radial-gradient(circle, rgba(200,151,58,0.12) 0%, transparent 70%);
+border-radius: 50%;
+}
+.entry-content {
+padding: 36px 36px 32px;
+display: flex;
+flex-direction: column;
+justify-content: center;
+}
+.entry-cat {
+font-family: var(--f-heading);
+font-size: 0.58rem;
+letter-spacing: 0.4em;
+text-transform: uppercase;
+color: var(--gold);
+margin-bottom: 10px;
+}
+.entry-title {
+font-family: var(--f-heading);
+font-size: clamp(1.7rem, 3vw, 2.4rem);
+font-weight: 600;
+color: var(--gold-pale);
+line-height: 1.15;
+margin-bottom: 18px;
+letter-spacing: 0.05em;
+}
+.entry-excerpt {
+font-family: var(--f-body);
+font-size: 1.08rem;
+color: var(--text);
+line-height: 1.85;
+margin-bottom: 24px;
+}
+.entry-meta {
+display: flex;
+gap: 20px;
+flex-wrap: wrap;
+border-top: 1px solid var(--border2);
+padding-top: 16px;
+}
+.entry-meta-item {
+font-family: var(--f-heading);
+font-size: 0.58rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--silver-dim);
+}
+.entry-meta-item span { color: var(--gold); margin-left: 6px; }
+.featured-ribbon {
+position: absolute;
+top: 0; left: 0;
+background: var(--gold);
+color: var(--ink);
+font-family: var(--f-heading);
+font-size: 0.52rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+padding: 4px 14px;
+}
+/* ══════════════════════════════════════════
+CATEGORY STRIPS — DÜZELTİLMİŞ GRID
+══════════════════════════════════════════ */
+.category-strip {
+margin-bottom: 48px;
+animation: fade-up 0.8s 0.3s both;
+}
+.entry-grid {
+display: grid;
+grid-template-columns: repeat(3, 1fr);
+gap: 0;
+background: var(--border2);
+border: 1px solid var(--border);
+}
+@media (max-width: 900px) { .entry-grid { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 600px) { .entry-grid { grid-template-columns: 1fr; } }
+.entry-card {
+background: var(--ink2);
+padding: 26px 24px 22px;
+position: relative;
+cursor: pointer;
+transition: background 0.25s;
+overflow: visible;
+border-right: 1px solid var(--border2);
+border-bottom: 1px solid var(--border2);
+}
+.entry-card::after {
+content: '';
+position: absolute;
+bottom: 0; left: 0; right: 0;
+height: 2px;
+background: linear-gradient(90deg, var(--gold), var(--gold-light));
+transform: scaleX(0);
+transform-origin: left;
+transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+}
+.entry-card:hover { background: var(--navy2); }
+.entry-card:hover::after { transform: scaleX(1); }
+/* Son sütun border kaldırma */
+.entry-grid .entry-card:nth-child(3n) { border-right: none; }
+@media (max-width: 900px) { .entry-grid .entry-card:nth-child(2n) { border-right: none; } }
+@media (max-width: 600px) { .entry-grid .entry-card { border-right: none; } }
+.card-number {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.25em;
+color: rgba(200,151,58,0.35);
+margin-bottom: 10px;
+}
+.card-icon {
+font-size: 1.6rem;
+margin-bottom: 10px;
+display: block;
+filter: grayscale(0.3);
+}
+.card-title {
+font-family: var(--f-heading);
+font-size: 0.88rem;
+font-weight: 600;
+letter-spacing: 0.08em;
+color: var(--gold-light);
+margin-bottom: 8px;
+line-height: 1.3;
+}
+.card-body {
+font-family: var(--f-body);
+font-size: 0.95rem;
+color: var(--text-dim);
+line-height: 1.7;
+}
+/* ══════════════════════════════════════════
+TIMELINE
+══════════════════════════════════════════ */
+.timeline-section {
+margin-bottom: 48px;
+animation: fade-up 0.8s 0.5s both;
+}
+.timeline {
+position: relative;
+padding-left: 32px;
+}
+.timeline::before {
+content: '';
+position: absolute;
+left: 7px; top: 8px; bottom: 0;
+width: 1px;
+background: linear-gradient(180deg, var(--gold), transparent);
+}
+.tl-item {
+position: relative;
+margin-bottom: 28px;
+padding-bottom: 28px;
+border-bottom: 1px solid var(--border2);
+}
+.tl-item:last-child { border-bottom: none; margin-bottom: 0; }
+.tl-dot {
+position: absolute;
+left: -29px; top: 6px;
+width: 12px; height: 12px;
+border-radius: 50%;
+border: 1px solid var(--gold);
+background: var(--ink);
+box-shadow: 0 0 8px rgba(200,151,58,0.4);
+}
+.tl-year {
+font-family: var(--f-heading);
+font-size: 0.6rem;
+letter-spacing: 0.25em;
+color: var(--gold);
+margin-bottom: 4px;
+}
+.tl-title {
+font-family: var(--f-heading);
+font-size: 0.85rem;
+color: var(--gold-light);
+margin-bottom: 6px;
+letter-spacing: 0.06em;
+}
+.tl-body {
+font-family: var(--f-body);
+font-size: 0.97rem;
+color: var(--text-dim);
+line-height: 1.7;
+}
+/* ══════════════════════════════════════════
+SIDEBAR
+══════════════════════════════════════════ */
+.sidebar { display: flex; flex-direction: column; gap: 28px; }
+.sb-block {
+border: 1px solid var(--border);
+background: var(--navy);
+padding: 24px;
+position: relative;
+overflow: hidden;
+}
+.sb-block::before {
+content: '';
+position: absolute; top:0; left:0; right:0;
+height: 2px;
+background: linear-gradient(90deg, var(--gold), var(--gold-light), var(--gold));
+opacity: 0.5;
+}
+.sb-title {
+font-family: var(--f-heading);
+font-size: 0.58rem;
+letter-spacing: 0.4em;
+text-transform: uppercase;
+color: var(--gold);
+margin-bottom: 18px;
+padding-bottom: 10px;
+border-bottom: 1px solid var(--border2);
+}
+.index-list { list-style: none; }
+.index-list li {
+display: flex;
+justify-content: space-between;
+align-items: baseline;
+gap: 12px;
+padding: 8px 0;
+border-bottom: 1px dotted rgba(200,151,58,0.12);
+cursor: pointer;
+transition: color 0.2s;
+}
+.index-list li:last-child { border-bottom: none; }
+.index-list li:hover .il-name { color: var(--gold-light); }
+.il-name {
+font-family: var(--f-body);
+font-size: 0.97rem;
+color: var(--text);
+transition: color 0.2s;
+}
+.il-tag {
+font-family: var(--f-heading);
+font-size: 0.5rem;
+letter-spacing: 0.2em;
+text-transform: uppercase;
+color: var(--silver-dim);
+white-space: nowrap;
+}
+.symbol-grid {
+display: grid;
+grid-template-columns: repeat(4, 1fr);
+gap: 8px;
+}
+.sym-item {
+aspect-ratio: 1;
+background: var(--ink2);
+border: 1px solid var(--border2);
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+gap: 4px;
+cursor: pointer;
+transition: border-color 0.2s, background 0.2s;
+padding: 8px 4px;
+position: relative;
+}
+.sym-item:hover {
+border-color: var(--gold);
+background: var(--gold-ghost);
+}
+.sym-glyph { font-size: 1.5rem; }
+.sym-name {
+font-family: var(--f-heading);
+font-size: 0.42rem;
+letter-spacing: 0.15em;
+text-transform: uppercase;
+color: var(--silver-dim);
+text-align: center;
+}
+.sym-item:hover .sym-name { color: var(--gold); }
+.sym-tooltip {
+display: none;
+position: absolute;
+bottom: calc(100% + 8px);
+left: 50%; transform: translateX(-50%);
+background: var(--navy);
+border: 1px solid var(--border);
+padding: 8px 12px;
+font-family: var(--f-body);
+font-size: 0.82rem;
+color: var(--text);
+white-space: nowrap;
+z-index: 50;
+pointer-events: none;
+}
+.sym-item:hover .sym-tooltip { display: block; }
+.cred-item { margin-bottom: 14px; }
+.cred-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: 5px;
+}
+.cred-name {
+font-family: var(--f-body);
+font-size: 0.93rem;
+color: var(--text);
+}
+.cred-score {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.2em;
+color: var(--gold);
+}
+.cred-track {
+height: 3px;
+background: var(--border2);
+position: relative;
+}
+.cred-fill {
+height: 100%;
+background: linear-gradient(90deg, var(--silver-dim), var(--gold-light));
+animation: bar-grow 1.8s cubic-bezier(0.16,1,0.3,1) both;
+}
+@keyframes bar-grow { from { width: 0 !important; } }
+.pull-quote {
+border-left: 2px solid var(--gold);
+padding: 0 0 0 18px;
+margin: 0;
+}
+.pull-quote blockquote {
+font-family: var(--f-body);
+font-size: 1.12rem;
+font-style: italic;
+color: var(--silver);
+line-height: 1.8;
+}
+.pull-quote cite {
+display: block;
+margin-top: 10px;
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.25em;
+text-transform: uppercase;
+color: var(--gold);
+font-style: normal;
+}
+/* ══════════════════════════════════════════
+DEEP DIVE
+══════════════════════════════════════════ */
+.deep-dive {
+border: 1px solid var(--border);
+background: var(--navy);
+padding: 40px 40px 36px;
+margin-bottom: 44px;
+display: grid;
+grid-template-columns: 1fr 2fr;
+gap: 40px;
+animation: fade-up 0.8s 0.4s both;
+}
+@media (max-width: 700px) { .deep-dive { grid-template-columns: 1fr; } }
+.dd-aside { border-right: 1px solid var(--border2); padding-right: 40px; }
+@media (max-width: 700px) { .dd-aside { border-right: none; padding-right: 0; } }
+.dd-label {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.4em;
+text-transform: uppercase;
+color: var(--gold);
+margin-bottom: 8px;
+}
+.dd-title {
+font-family: var(--f-heading);
+font-size: 1.5rem;
+font-weight: 600;
+color: var(--gold-pale);
+letter-spacing: 0.05em;
+margin-bottom: 14px;
+line-height: 1.25;
+}
+.dd-num {
+font-family: var(--f-display);
+font-size: 4rem;
+color: rgba(200,151,58,0.12);
+line-height: 1;
+letter-spacing: 0.05em;
+}
+.dd-body p {
+font-family: var(--f-body);
+font-size: 1.06rem;
+color: var(--text);
+line-height: 1.9;
+margin-bottom: 16px;
+text-align: justify;
+hyphens: auto;
+}
+.dd-body p:first-child::first-letter {
+font-family: var(--f-display);
+font-size: 3.2rem;
+color: var(--gold);
+float: left;
+line-height: 0.85;
+margin-right: 8px;
+margin-top: 6px;
+}
+/* ══════════════════════════════════════════
+FOOTER
+══════════════════════════════════════════ */
+footer {
+border-top: 1px solid var(--border);
+background: var(--navy);
+padding: 44px 48px 32px;
+text-align: center;
+}
+.footer-logo {
+font-family: var(--f-display);
+font-size: 1.6rem;
+color: var(--gold);
+letter-spacing: 0.2em;
+margin-bottom: 6px;
+opacity: 0.7;
+}
+.footer-motto {
+font-family: var(--f-body);
+font-style: italic;
+font-size: 0.92rem;
+color: var(--silver-dim);
+margin-bottom: 24px;
+}
+.footer-nav {
+display: flex;
+justify-content: center;
+gap: 32px;
+flex-wrap: wrap;
+margin-bottom: 24px;
+}
+.footer-nav a {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.3em;
+text-transform: uppercase;
+color: var(--silver-dim);
+transition: color 0.2s;
+}
+.footer-nav a:hover { color: var(--gold); }
+.footer-copy {
+font-family: var(--f-heading);
+font-size: 0.55rem;
+letter-spacing: 0.2em;
+color: rgba(100,120,160,0.35);
+text-transform: uppercase;
+}
+.footer-ornament {
+font-size: 1.4rem;
+color: var(--gold);
+opacity: 0.25;
+margin-bottom: 20px;
+}
 </style>
 </head>
 <body>
-
+<!-- ══════════════════════════════════════
+MASTHEAD
+══════════════════════════════════════ -->
 <header class="masthead">
-  <h1 class="masthead-title">ARCANA</h1>
-  <p class="masthead-sub">İnsanlığın kayıp bilgeliği ve gizem gelenekleri.</p>
+<div class="masthead-bg"></div>
+<div class="masthead-eyebrow">Gizem · Mit · Tarih · Sembol</div>
+<h1 class="masthead-title">ARCANA</h1>
+<p class="masthead-sub">İnsanlığın kayıp bilgeliğini, gizem geleneklerini ve sorgulanmamış anlatıları belgeleyen açık ansiklopedi</p>
+<div class="masthead-ornament">
+<div class="orn-line"></div>
+<span class="orn-sym">✦</span>
+<span class="orn-sym" style="opacity:0.3">◈</span>
+<span class="orn-sym">✦</span>
+<div class="orn-line right"></div>
+</div>
 </header>
-
+<!-- ══════════════════════════════════════
+TOP NAV
+══════════════════════════════════════ -->
 <nav class="topnav">
-  <a href="#" class="active">Ana Sayfa</a>
-  <a href="#antik-mitoloji">Antik Mitoloji</a>
-  <a href="#sidebar-search">Arşiv</a>
+<a href="#" class="active">Ana Sayfa</a>
+<a href="#">Komplo Teorileri</a>
+<a href="#">Antik Mitoloji</a>
+<a href="#">Kayıp Medeniyetler</a>
+<a href="#">Okültizm & Semboller</a>
+<a href="#">Kronoloji</a>
+<a href="#">Arşiv</a>
+<a href="#">Kaynakça</a>
 </nav>
-
+<!-- ══════════════════════════════════════
+MAIN PAGE WRAP
+══════════════════════════════════════ -->
 <div class="page-wrap">
-  <main>
-    <section id="antik-mitoloji" class="category-strip">
-        <div class="section-label"><span class="section-label-text">Antik Mitoloji</span></div>
-        <div class="entry-grid">
-            <div class="entry-card js-reveal" data-article="anunnaki">
-                <div class="card-number">01</div>
-                <div class="card-title">Anunnaki: Tanrılar mı?</div>
-                <div class="card-body">Sümer tabletlerindeki gizemli figürler...</div>
-                <button class="read-more-link">Devamını Oku →</button>
-            </div>
-        </div>
-    </section>
-  </main>
-
-  <aside class="sidebar">
-    <div class="sb-block" id="sidebar-search">
-      <div class="sb-title">İndeks Filtrele</div>
-      <div class="search-wrap">
-        <input type="text" id="indexSearch" class="search-input" placeholder="Madde ara...">
-        <span class="search-count" id="searchCount"></span>
-      </div>
-      <ul class="index-list" id="indexList">
-        <li data-terms="anunnaki sumer tanrilar"><span class="il-name">Anunnaki</span><span class="il-tag">Mitoloji</span></li>
-        <li data-terms="atlantis kayip kita platon"><span class="il-name">Atlantis</span><span class="il-tag">Uygarlık</span></li>
-      </ul>
-    </div>
-  </aside>
+<!-- ═══════ LEFT / MAIN ═══════ -->
+<main>
+<!-- FEATURED ENTRY -->
+<div class="section-label">
+<span class="section-label-text">Öne Çıkan Madde</span>
+<div class="section-label-line"></div>
 </div>
-
-<div class="modal-overlay" id="modalOverlay">
-    <div class="modal">
-        <button class="modal-close" id="closeModal">KAPAT</button>
-        <div id="modalContent">
-            <h2 class="modal-title" id="mTitle"></h2>
-            <div class="modal-body" id="mBody"></div>
-        </div>
-    </div>
+<article class="featured-entry">
+<div class="featured-ribbon">Bu Haftanın Maddesi</div>
+<div class="featured-entry-inner">
+<div class="entry-visual">
+<svg viewBox="0 0 220 220" fill="none" xmlns="http://www.w3.org/2000/svg"
+role="img" aria-labelledby="svg-pyramid-title">
+<title id="svg-pyramid-title">Provizyon Gözü — piramit üzerindeki her şeyi gören göz sembolü</title>
+<desc id="svg-pyramid-desc">ABD dolar banknotunda yer alan Masonik sembolizm örneği: Her şeyi gören göz ve eksik tepe taşlı piramit.</desc>
+<defs>
+<radialGradient id="gld" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="#e4b96a" stop-opacity="0.9"/>
+<stop offset="100%" stop-color="#c8973a" stop-opacity="0.3"/>
+</radialGradient>
+<radialGradient id="eyegl" cx="50%" cy="50%" r="50%">
+<stop offset="0%" stop-color="#c8973a" stop-opacity="0.5"/>
+<stop offset="100%" stop-color="#c8973a" stop-opacity="0"/>
+</radialGradient>
+</defs>
+<g opacity="0.18" stroke="#c8973a" stroke-width="0.6">
+<line x1="110" y1="110" x2="10"  y2="10"/>
+<line x1="110" y1="110" x2="210" y2="10"/>
+<line x1="110" y1="110" x2="10"  y2="210"/>
+<line x1="110" y1="110" x2="210" y2="210"/>
+<line x1="110" y1="110" x2="110" y2="0"/>
+<line x1="110" y1="110" x2="110" y2="220"/>
+<line x1="110" y1="110" x2="0"   y2="110"/>
+<line x1="110" y1="110" x2="220" y2="110"/>
+</g>
+<circle cx="110" cy="110" r="98" stroke="#c8973a" stroke-width="0.8" stroke-dasharray="4 3" opacity="0.35"/>
+<circle cx="110" cy="110" r="72" stroke="#c8973a" stroke-width="0.5" opacity="0.2"/>
+<polygon points="110,38 185,168 35,168" stroke="#c8973a" stroke-width="1.5" fill="rgba(200,151,58,0.04)" opacity="0.8"/>
+<line x1="84" y1="110" x2="136" y2="110" stroke="#c8973a" stroke-width="0.8" opacity="0.6"/>
+<ellipse cx="110" cy="74" rx="28" ry="18" fill="url(#eyegl)" opacity="0.6"/>
+<path d="M88 74 Q110 55 132 74 Q110 93 88 74Z" fill="rgba(200,151,58,0.08)" stroke="#c8973a" stroke-width="1.2" opacity="0.9"/>
+<circle cx="110" cy="74" r="9" fill="rgba(200,151,58,0.15)" stroke="#c8973a" stroke-width="1" opacity="0.9"/>
+<circle cx="110" cy="74" r="4" fill="#c8973a" opacity="0.7"/>
+<text x="110" y="186" text-anchor="middle" font-family="Cinzel,serif" font-size="7" fill="#c8973a" opacity="0.5" letter-spacing="3">MDCCLXXVI</text>
+<text x="40" y="44" text-anchor="middle" font-size="10" fill="#c8973a" opacity="0.3" aria-hidden="true">✦</text>
+<text x="180" y="44" text-anchor="middle" font-size="10" fill="#c8973a" opacity="0.3" aria-hidden="true">✦</text>
+</svg>
 </div>
-
+<div class="entry-content">
+<div class="entry-cat">Komplo Teorileri · Okültizm</div>
+<h2 class="entry-title">Yeni Dünya Düzeni ve Provizyon Gözü</h2>
+<p class="entry-excerpt">
+Dolar banknotunun arkasındaki piramit ve "Her Şeyi Gören Göz" sembolü, yüzyıllardır
+gizli dünya yönetimi iddialarının merkezindedir. Bu sembolün Masonik kökleri,
+Mısır mitolojisindeki <em>Udjat</em> gözüyle bağlantısı ve modern komplo teorilerindeki
+yeri akademik bir perspektifle inceleniyor.
+</p>
+<div class="entry-meta">
+<div class="entry-meta-item">Kategori<span>Semboloji</span></div>
+<div class="entry-meta-item">Köken<span>18. yy.</span></div>
+<div class="entry-meta-item">Güvenilirlik<span>Tartışmalı</span></div>
+</div>
+</div>
+</div>
+</article>
+<!-- ANTIK MITOLOJI STRIP -->
+<div id="antik-mitoloji" class="category-strip section-anchor">
+<div class="section-label">
+<span class="section-label-text">Antik Mitoloji</span>
+<div class="section-label-line"></div>
+</div>
+<div class="entry-grid">
+<div class="entry-card js-reveal" data-modal="anunnaki" tabindex="0" role="button" aria-label="Anunnaki makalesini oku">
+<div class="card-number">01</div>
+<span class="card-icon">🔱</span>
+<div class="card-title">Anunnaki: Tanrılar mı, Uzaylılar mı?</div>
+<div class="card-body">Sümer çivi yazılarındaki gizemli varlıklar — akademisyenlerin yeraltı tanrıları dediği, Sitchin'in uzaylılar dediği bu figürler gerçekte kimdir? MÖ 3000'den kalma tabletler ne anlatıyor?</div>
+<button class="read-more-link" data-modal="anunnaki">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="atlantis" tabindex="0" role="button" aria-label="Atlantis makalesini oku">
+<div class="card-number">02</div>
+<span class="card-icon">🌊</span>
+<div class="card-title">Atlantis: Platon'un Kayıp Kıtası</div>
+<div class="card-body">Felsefi alegori mi, Santorini patlamasının yankısı mı, yoksa gerçek kayıp uygarlığın hafızası mı? Platon'un MÖ 360'ta yazdığı iki diyalog, 2400 yıldır yanıtlanamayan soruyu canlı tutuyor.</div>
+<button class="read-more-link" data-modal="atlantis">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="ra" tabindex="0" role="button" aria-label="Ra Kültü makalesini oku">
+<div class="card-number">03</div>
+<span class="card-icon">☀️</span>
+<div class="card-title">Ra, Aton ve Monoteizmin Kökeni</div>
+<div class="card-body">Firavun Akhenaton, MÖ 14. yüzyılda tüm Mısır tanrılarını yasakladı. Tarihte ilk devlet destekli monoteizm mi? Ve bu olay Musevilikle gerçekten bağlantılı mıydı?</div>
+<button class="read-more-link" data-modal="ra">Devamını Oku →</button>
+</div>
+</div>
+</div>
+<!-- DEEP DIVE ARTICLE -->
+<div class="section-label">
+<span class="section-label-text">Derinlemesine İnceleme</span>
+<div class="section-label-line"></div>
+</div>
+<div class="deep-dive">
+<div class="dd-aside">
+<div class="dd-label">Kayıp Medeniyetler</div>
+<div class="dd-title">Göbekli Tepe ve Tarih Öncesi Uygarlık Sorusu</div>
+<div class="dd-num">~12.000</div>
+<div style="font-family:var(--f-heading);font-size:0.55rem;letter-spacing:0.2em;color:var(--silver-dim);text-transform:uppercase;margin-top:4px">Yıl Önce İnşa Edildi</div>
+</div>
+<div class="dd-body">
+<p>
+Şanlıurfa'nın kuzeyindeki Göbekli Tepe, 1994 yılında arkeolog Klaus Schmidt tarafından kazılmaya başlandığında insanlık tarihine dair yerleşik paradigmayı sarstı. T-biçimli, aralarında tilki, akrep, yılan ve akbaba gibi hayvan figürleriyle bezenmiş 5–6 metrelik taş sütunlar, dönemin yerleşik arkeoloji anlayışının çok ötesinde bir organizasyona işaret ediyordu. Yapı kompleksi Stonehenge'den yaklaşık yedi bin yıl önce inşa edilmişti; çiftçiliğin bile henüz bulunmadığı bir çağda.
+</p>
+<p>
+Resmi arkeoloji Göbekli Tepe'yi avcı-toplayıcı toplulukların büyük ortak ritüel mekânı olarak yorumlar. Bu yorum başlı başına devrimcidir: tarihçilerin uzun süre savunduğu "önce tarım, sonra tapınak, sonra şehir" dizisi tersine döndü. Göbekli Tepe, toplumsal örgütlenmenin ve dini mimarlığın ekonomik altyapıdan önce gelebileceğini gösterdi.
+</p>
+<p>
+Graham Hancock gibi bağımsız araştırmacılar bu bulguyu daha ileri götürür: yapının mühendislik hassasiyeti ve bazı sütunların astronomik konumlanması, organize bir bilgi geleneğinin varlığına işaret eder. Ana akım akademi bu yorumu "yetersiz kanıt" gerekçesiyle reddeder. İki tarafın anlaşamadığı nokta açıktır; ancak kesin olan şudur — kazıların yalnızca <strong>%5'i tamamlanmıştır.</strong> Geri kalan %95'inde ne çıkacağını kimse bilmiyor.
+</p>
+</div>
+</div>
+<!-- KOMPLO TEORİLERİ STRIP -->
+<div id="komplo-teorileri" class="category-strip section-anchor">
+<div class="section-label">
+<span class="section-label-text">Komplo Teorileri</span>
+<div class="section-label-line"></div>
+</div>
+<div class="entry-grid">
+<div class="entry-card js-reveal" data-modal="mkultra" tabindex="0" role="button" aria-label="MKUltra makalesini oku">
+<div class="card-number">01</div>
+<span class="card-icon">🏛️</span>
+<div class="card-title">MKUltra: Teoriden Senato Tutanağına</div>
+<div class="card-body">CIA 1953–1973 yılları arasında vatandaşlar üzerinde gizli LSD ve hipnoz deneyleri yaptı. Bu "komplo teorisi" 1977'de Senato kayıtlarıyla kanıtlandı. Peki belgelerin büyük bölümü neden imha edildi?</div>
+<button class="read-more-link" data-modal="mkultra">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="haarp" tabindex="0" role="button" aria-label="HAARP makalesini oku">
+<div class="card-number">02</div>
+<span class="card-icon">📡</span>
+<div class="card-title">HAARP: İyonosfer Silahı mı?</div>
+<div class="card-body">Alaska'daki 180 antenli tesis deprem, kasırca ve zihin kontrolüne mi kullanılıyor? Fizik gerçekte ne söylüyor? Ve hava modifikasyonu gerçekten var mı?</div>
+<button class="read-more-link" data-modal="haarp">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="echelon" tabindex="0" role="button" aria-label="Echelon makalesini oku">
+<div class="card-number">03</div>
+<span class="card-icon">🌐</span>
+<div class="card-title">Echelon: 40 Yıl İnkâr Edilen Ağ</div>
+<div class="card-body">ABD, İngiltere, Kanada, Avustralya ve Yeni Zelanda'nın küresel dinleme ağı yıllarca "komplo teorisi" diye geçiştirildi. 1999'dan itibaren birer birer doğrulandı. Snowden gerisini bitirdi.</div>
+<button class="read-more-link" data-modal="echelon">Devamını Oku →</button>
+</div>
+</div>
+</div>
+<!-- OKULTIZM STRIP -->
+<div id="okultizm-semboller" class="category-strip section-anchor">
+<div class="section-label">
+<span class="section-label-text">Okültizm & Semboller</span>
+<div class="section-label-line"></div>
+</div>
+<div class="entry-grid">
+<div class="entry-card js-reveal" data-modal="simya" tabindex="0" role="button" aria-label="Simya makalesini oku">
+<div class="card-number">01</div>
+<span class="card-icon">⚗️</span>
+<div class="card-title">Simya: Modern Kimyanın Karanlık Atası</div>
+<div class="card-body">Newton, Boyle ve Paracelsus'un gizlice sürdürdüğü bu pratik, kurşunu altına çevirmekten çok başka bir şey arıyordu. Cambridge arşivlerindeki Newton notları bugün hâlâ tam yayımlanmadı.</div>
+<button class="read-more-link" data-modal="simya">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="kabala" tabindex="0" role="button" aria-label="Kabala makalesini oku">
+<div class="card-number">02</div>
+<span class="card-icon">🔯</span>
+<div class="card-title">Kabala: Varoluşun On Boyutu</div>
+<div class="card-body">13. yüzyılda İspanya'da doğan <em>Zohar</em>, evrenin ve insan ruhunun haritasını on sefirot ile çizdi. Bu sistem bugün Hollywood'dan pop müziğe küresel bir kültür markasına dönüştü.</div>
+<button class="read-more-link" data-modal="kabala">Devamını Oku →</button>
+</div>
+<div class="entry-card js-reveal" data-modal="altin-oran" tabindex="0" role="button" aria-label="Altın Oran makalesini oku">
+<div class="card-number">03</div>
+<span class="card-icon">🌀</span>
+<div class="card-title">Φ: Altın Oran ve Kutsal Geometri</div>
+<div class="card-body">Piramitlerde, Parthenon'da, ayçiçeğinde ve DNA sarmalında görülen 1,618… sayısı gerçekten evrenin şifresi mi? Matematikçiler inanılmaz miktarda "efsane" buldu — gerçek nerede başlıyor?</div>
+<button class="read-more-link" data-modal="altin-oran">Devamını Oku →</button>
+</div>
+</div>
+</div>
+<!-- TIMELINE -->
+<div id="kronoloji" class="timeline-section section-anchor">
+<div class="section-label">
+<span class="section-label-text">Gizem Kronolojisi</span>
+<div class="section-label-line"></div>
+</div>
+<div class="timeline">
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">MÖ ~10.000</div>
+<div class="tl-title">Göbekli Tepe'nin İnşası</div>
+<div class="tl-body">Bilinen en eski anıtsal yapı kompleksi; tarih öncesi uygarlık tartışmalarının merkezi.</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">MÖ ~2600</div>
+<div class="tl-title">Büyük Piramit'in İnşası</div>
+<div class="tl-body">Gize'nin matematiksel hassasiyeti — π ve φ oranlarının kasıtlı mı yoksa tesadüfi mi kullanıldığı tartışması sürmektedir.</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">1776</div>
+<div class="tl-title">Illuminati'nin Kuruluşu</div>
+<div class="tl-body">Adam Weishaupt tarafından Bavyera'da kurulan ve 1785'te yasaklanan örgüt; modern Yeni Dünya Düzeni teorilerinin tarihsel dayanağı.</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">1947</div>
+<div class="tl-title">Roswell ve UFO Söylemi</div>
+<div class="tl-body">ABD hükümeti açıklamalarındaki tutarsızlıklar ile ordu belgelerinde yer alan "hava balonu" hikâyesinin çelişen ayrıntıları.</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">1963–1977</div>
+<div class="tl-title">MKUltra Programı</div>
+<div class="tl-body">CIA'in LSD ve hipnoz destekli zihin kontrolü araştırmalarının 1977 Senato soruşturmasıyla kamusal alana taşınması.</div>
+</div>
+<div class="tl-item">
+<div class="tl-dot"></div>
+<div class="tl-year">2013</div>
+<div class="tl-title">Snowden Belgeleri</div>
+<div class="tl-body">PRISM programı; küresel gözetim "komplo teorisi"nin belgelenmiş gerçeğe dönüştüğü dönüm noktası.</div>
+</div>
+</div>
+</div>
+</main>
+<!-- ═══════ SIDEBAR ═══════ -->
+<aside class="sidebar">
+<div class="sb-block">
+<div class="sb-title">Günün Maddeleri</div>
+<div class="search-wrap">
+<input type="search" class="search-input" id="indexSearch" placeholder="Madde ara…" aria-label="Madde listesinde ara" autocomplete="off"/>
+<span class="search-icon" aria-hidden="true">⌕</span>
+</div>
+<div class="search-count" id="searchCount" aria-live="polite"></div>
+<ul class="index-list" id="indexList">
+<li data-terms="hermetizm okultizm hermes trismegistus"><span class="il-name">Hermetizm</span><span class="il-tag">Okültizm</span></li>
+<li data-terms="tartaria imparatorlugu komplo kayip medeniyet"><span class="il-name">Tartaria İmparatorluğu</span><span class="il-tag">Komplo</span></li>
+<li data-terms="nazca cizgileri arkeoloji peru uzayli"><span class="il-name">Nazca Çizgileri</span><span class="il-tag">Arkeoloji</span></li>
+<li data-terms="freemasonluk mason gizem localar"><span class="il-name">Freemasonluk</span><span class="il-tag">Gizem</span></li>
+<li data-terms="mu kitasi kayip medeniyet pasifik lemurya"><span class="il-name">Mu Kıtası</span><span class="il-tag">Kayıp Med.</span></li>
+<li data-terms="bohemian grove komplo elit rituel"><span class="il-name">Bohemian Grove</span><span class="il-tag">Komplo</span></li>
+<li data-terms="enoch kitabi apokrifal din melek"><span class="il-name">Enoch Kitabı</span><span class="il-tag">Apokrif</span></li>
+<li data-terms="philadelphia deneyi askeri deniz gemisi"><span class="il-name">Philadelphia Deneyi</span><span class="il-tag">Askeri</span></li>
+<li data-terms="anunnaki sumerce tanrilar uzayli mezopotamya"><span class="il-name">Anunnaki</span><span class="il-tag">Mitoloji</span></li>
+<li data-terms="atlantis kayip medeniyet platon okyanus"><span class="il-name">Atlantis</span><span class="il-tag">Kayıp Med.</span></li>
+<li data-terms="mkultra cia zihin kontrolu kanıtlanmış"><span class="il-name">MKUltra</span><span class="il-tag">Komplo</span></li>
+<li data-terms="goebekli tepe arkeoloji tarih oncesi urfa"><span class="il-name">Göbekli Tepe</span><span class="il-tag">Arkeoloji</span></li>
+</ul>
+</div>
+<div class="sb-block">
+<div class="sb-title">Sembol Rehberi</div>
+<div class="symbol-grid">
+<div class="sym-item"><span class="sym-glyph">☥</span><span class="sym-name">Ankh</span><div class="sym-tooltip">Mısır'da sonsuz yaşam</div></div>
+<div class="sym-item"><span class="sym-glyph">🜏</span><span class="sym-name">Kükürt</span><div class="sym-tooltip">Simyasal ateş ilkesi</div></div>
+<div class="sym-item"><span class="sym-glyph">⊕</span><span class="sym-name">Dünya</span><div class="sym-tooltip">Dört element birliği</div></div>
+<div class="sym-item"><span class="sym-glyph">🜄</span><span class="sym-name">Su</span><div class="sym-tooltip">Simyasal su/dişil ilke</div></div>
+<div class="sym-item"><span class="sym-glyph">𓂀</span><span class="sym-name">Udjat</span><div class="sym-tooltip">Horus'un gözü — koruma</div></div>
+<div class="sym-item"><span class="sym-glyph">⚕</span><span class="sym-name">Kadusey</span><div class="sym-tooltip">Hermes'in yılan asası</div></div>
+<div class="sym-item"><span class="sym-glyph">✡</span><span class="sym-name">Magen</span><div class="sym-tooltip">Kabalistik altı ışın</div></div>
+<div class="sym-item"><span class="sym-glyph">☯</span><span class="sym-name">Taijitu</span><div class="sym-tooltip">Yin-yang ikiliği</div></div>
+</div>
+</div>
+<div class="sb-block">
+<div class="sb-title">Kanıt Güvenilirliği</div>
+<p style="font-family:var(--f-body);font-size:0.88rem;color:var(--text-dim);margin-bottom:16px;line-height:1.6;">Seçili teorilerin mevcut akademik ve belgeli kanıtlarla örtüşme oranı</p>
+<div class="cred-item">
+<div class="cred-header"><span class="cred-name">MKUltra (CIA)</span><span class="cred-score">Kanıtlanmış</span></div>
+<div class="cred-track"><div class="cred-fill" style="width:98%"></div></div>
+</div>
+<div class="cred-item">
+<div class="cred-header"><span class="cred-name">Küresel Gözetim</span><span class="cred-score">Büyük Ölçüde</span></div>
+<div class="cred-track"><div class="cred-fill" style="width:85%"></div></div>
+</div>
+<div class="cred-item">
+<div class="cred-header"><span class="cred-name">Göbekli Tepe Gizemi</span><span class="cred-score">Tartışmalı</span></div>
+<div class="cred-track"><div class="cred-fill" style="width:52%"></div></div>
+</div>
+<div class="cred-item">
+<div class="cred-header"><span class="cred-name">Anunnaki Teorisi</span><span class="cred-score">Marjinal</span></div>
+<div class="cred-track"><div class="cred-fill" style="width:18%"></div></div>
+</div>
+<div class="cred-item">
+<div class="cred-header"><span class="cred-name">Düz Dünya</span><span class="cred-score">Yanlışlandı</span></div>
+<div class="cred-track"><div class="cred-fill" style="width:2%"></div></div>
+</div>
+</div>
+<div class="sb-block">
+<div class="sb-title">Alıntı</div>
+<div class="pull-quote">
+<blockquote>"Bugünün komplo teorisi, çoğunlukla yarının gazete manşetidir."</blockquote>
+<cite>— Michael Moore, 2003</cite>
+</div>
+</div>
+<div class="sb-block" style="border-color:rgba(138,154,184,0.2)">
+<div class="sb-title" style="color:var(--silver)">Editoryal Not</div>
+<p style="font-family:var(--f-body);font-size:0.95rem;color:var(--text-dim);line-height:1.75;">
+ARCANA, tüm teorilere eşit mesafede yaklaşır. Her madde kaynak gösterilen ve
+akademik araştırmayla desteklenen bilgilerle derlenir. Bir teoriyi
+aktarmak, onu onaylamak değildir.
+</p>
+</div>
+</aside>
+</div>
+<!-- ══════════════════════════════════════
+FOOTER
+══════════════════════════════════════ -->
+<footer>
+<div class="footer-ornament">✦</div>
+<div class="footer-logo">ARCANA</div>
+<div class="footer-motto">"Gizli olan, yalnızca henüz sorulmamış olandır."</div>
+<nav class="footer-nav">
+<a href="#">Hakkında</a>
+<a href="#">Katkıda Bulunun</a>
+<a href="#">Kaynakça Standartları</a>
+<a href="#">Gizlilik</a>
+<a href="#">İletişim</a>
+</nav>
+<div class="footer-copy">© ARCANA Ansiklopedisi · Tüm içerikler eğitim amaçlıdır · Istanbul, Türkiye</div>
+</footer>
+<!-- ══════════════════════════════════════
+ARTICLE MODAL
+══════════════════════════════════════ -->
+<div class="modal-overlay" id="articleModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+<div class="modal" id="modalBox">
+<div class="modal-header">
+<div class="modal-cat" id="modalCat"></div>
+<h2 class="modal-title" id="modalTitle"></h2>
+<button class="modal-close" id="modalClose" aria-label="Kapat">ESC ✕</button>
+</div>
+<div class="modal-body" id="modalBody"></div>
+<div class="modal-body" id="modalSources" style="padding-top:0"></div>
+<div class="modal-body" style="padding-top:0" id="modalShare">
+<div class="modal-share">
+<span class="share-label">Paylaş</span>
+<button class="share-btn" id="btnCopyLink" aria-label="Madde linkini kopyala">
+<svg viewBox="0 0 16 16"><path d="M9.5 3a3.5 3.5 0 0 1 2.47 5.97l-1.06-1.06A2 2 0 1 0 8 5.5H6.5a3.5 3.5 0 0 1 3-3.5zm-3 10A3.5 3.5 0 0 1 4.03 7.03l1.06 1.06A2 2 0 1 0 8 10.5H9.5A3.5 3.5 0 0 1 6.5 13zm-1-5.5h5v1h-5v-1z"/></svg>
+Linki Kopyala
+</button>
+<button class="share-btn" id="btnShareTwitter" aria-label="Twitter'da paylaş">
+<svg viewBox="0 0 16 16"><path d="M5.026 15c6.038 0 9.341-5.003 9.341-9.334 0-.14 0-.282-.006-.422A6.685 6.685 0 0 0 16 3.542a6.658 6.658 0 0 1-1.889.518 3.301 3.301 0 0 0 1.447-1.817 6.533 6.533 0 0 1-2.087.793A3.286 3.286 0 0 0 7.875 6.03a9.325 9.325 0 0 1-6.767-3.429 3.289 3.289 0 0 0 1.018 4.382A3.323 3.323 0 0 1 .64 6.575v.045a3.288 3.288 0 0 0 2.632 3.218 3.203 3.203 0 0 1-.865.115 3.23 3.23 0 0 1-.614-.057 3.283 3.283 0 0 0 3.067 2.277A6.588 6.588 0 0 1 .78 13.58a6.32 6.32 0 0 1-.78-.045A9.344 9.344 0 0 0 5.026 15z"/></svg>
+X / Twitter
+</button>
+<button class="share-btn" id="btnCopyText" aria-label="Alıntı metnini kopyala">
+<svg viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1v-1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5h3zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3z"/></svg>
+Alıntı Kopyala
+</button>
+</div>
+</div>
+</div>
+</div>
 <script>
-/* ── ARŞİV VE ARAMA FONKSİYONU ──────────────── */
-const searchInput = document.getElementById("indexSearch");
-const indexItems = document.querySelectorAll("#indexList li");
-const countDisplay = document.getElementById("searchCount");
-
-function normalizeText(text) {
-    return text.toLowerCase()
-        .replace(/ı/g, 'i').replace(/ğ/g, 'g').replace(/ü/g, 'u')
-        .replace(/ş/g, 's').replace(/ö/g, 'o').replace(/ç/g, 'c')
-        .trim();
+(function() {
+"use strict";
+var A = {
+anunnaki: {
+cat: "Antik Mitoloji · Sümeroloji",
+title: "Anunnaki: Tanrılar mı, Uzaylılar mı?",
+body: "<p>Sümer çivi yazılarında geçen <em>Anunnaki</em> terimi dilbilimsel olarak 'yüksekten inenler' ya da 'gökyüzü tanrısının soyu' biçiminde çevrilir. Ana akım Sümeroloji bu varlıkları Mezopotamya panteonunun büyük tanrıları olarak tanımlar.</p><p>Zecharia Sitchin'in 1976 tarihli <em>The Twelfth Planet</em> serisi bu metinleri Nibiru adlı gezegenden gelen uzaylı bir ırkın kanıtı olarak okur; insanlığın altın madenciliği için genetik olarak tasarlandığını öne sürer. Akademik dilbilimciler bu çevirileri sistematik hatalarla dolu bularak reddeder — Sitchin'in 'roket' ve 'uzay gemisi' gördüğü sözcükler standart sözlüklerde bambaşka anlama gelir.</p><p>Kesin olan: Anunnaki metinleri MÖ 3. binyıla ait gerçek belgelerdir. British Museum ve Penn Museum koleksiyonlarında binlerce tablet mevcuttur. Yorumsal tartışma ise sürmektedir.</p>",
+meta: [{k:"Dönem",v:"MÖ ~3000"},{k:"Kaynak",v:"Sümer Çivi Yazıları"},{k:"Güvenilirlik",v:"Tartışmalı"}],
+sources: [
+{text:"Thorkild Jacobsen — Treasures of Darkness (1976)",url:"https://www.worldcat.org/title/treasures-of-darkness"},
+{text:"Michael S. Heiser — Sitchin Is Wrong",url:"https://www.sitchiniswrong.com"},
+{text:"British Museum — Sümer Koleksiyonu",url:"https://www.britishmuseum.org/collection"}
+]
+},
+atlantis: {
+cat: "Kayıp Medeniyetler · Antik Felsefe",
+title: "Atlantis: Platon'un Kayıp Kıtası",
+body: "<p>Atlantis anlatısı MÖ ~360'larda Platon'un <em>Timaios</em> ve <em>Kritias</em> diyaloglarında ortaya çıkar. Herkül Sütunları'nın ötesinde konumlanan güçlü bir ada imparatorluğunun Atina'ya yenildikten sonra tek bir günde sulara gömüldüğü anlatılır.</p><p>Günümüz araştırmacıları üç yaklaşım benimser: Platon'un felsefi alegori kurduğu tezi (en güçlü akademik destek); MÖ ~1600 Thera/Santorini patlamasının mitik çarpıtması hipotezi; gerçek ileri uygarlık tezi. Jeolojik olarak Atlas Okyanusu'nda kıtasal çöküş destekleyen bir yapı tespit edilmemiştir.</p><p>Atlantis, Batı kültürel belleğinde 'kayıp altın çağ' arketipinin en güçlü ifadesi olmayı sürdürür.</p>",
+meta: [{k:"Kaynak",v:"Platon (MÖ ~360)"},{k:"Kategori",v:"Mitoloji / Arkeoloji"},{k:"Durum",v:"Allegorik veya Mitik"}],
+sources: [
+{text:"Platon — Timaios & Kritias (İng. Çev. Jowett)",url:"https://www.gutenberg.org/ebooks/1572"},
+{text:"Encyclopedia Britannica — Atlantis",url:"https://www.britannica.com/place/Atlantis-legendary-island"},
+{text:"National Geographic — The Real Atlantis?",url:"https://www.nationalgeographic.com"}
+]
+},
+ra: {
+cat: "Antik Mitoloji · Mısır Dini",
+title: "Ra Kültü, Aton ve Monoteizmin Kökeni",
+body: "<p>Ra, Antik Mısır'ın baş güneş tanrısıdır. MÖ 3. binyıldan itibaren Heliopolis merkezli Ra teolojisi Mısır dini yaşamına egemen oldu. Ra günlük tekne yolculuğunda var oluşu sürdürür, her gece yılan Apep'le savaşır, sabah yeniden doğarak düzeni — Maat'ı — korur.</p><p>MÖ 14. yüzyılda Firavun Akhenaton tüm tanrıların yerini tek bir güneş diski olan Aton'a bırakmasını emretti. Tarihte kayıtlı ilk devlet destekli monoteizm girişimi budur. Akhenaton'un ölümünün ardından çok tanrılı sistem restore edildi.</p><p>Freud'un 1939 tarihli son eseri Musa'nın Aton inancını taşıyan bir Mısırlı rahip olduğunu öne sürdü. Tarihçilerin çoğunluğu bunu reddeder; ancak Ra/Aton ile Abrahamik gelenek arasındaki bağ tartışılmaya devam eder.</p>",
+meta: [{k:"Dönem",v:"MÖ ~3100–30"},{k:"Kültür",v:"Antik Mısır"},{k:"Önem",v:"Monoteizm Tartışması"}],
+sources: [
+{text:"Sigmund Freud — Moses and Monotheism (1939)",url:"https://www.gutenberg.org/ebooks/1276"},
+{text:"Jan Assmann — Moses the Egyptian (Harvard UP, 1997)",url:"https://www.hup.harvard.edu"},
+{text:"Metropolitan Museum — Ancient Egyptian Religion",url:"https://www.metmuseum.org/toah/hd/egrl/hd_egrl.htm"}
+]
+},
+mkultra: {
+cat: "Komplo Teorileri · Belgelenmiş Vaka",
+title: "MKUltra: Teoriden Senato Tutanağına",
+body: "<p>MKUltra, CIA'nın 1953–1973 yılları arasında yürüttüğü gizli zihin kontrolü araştırma programıdır. LSD deneyleri, hipnoz, elektrokonvülsif terapi ve psikolojik işkenceyi kapsayan 150'den fazla alt projeden oluşuyordu. Deneylerin büyük çoğunluğu rıza alınmadan gerçekleştirildi.</p><p>1973'te CIA Direktörü Richard Helms belgelerin büyük bölümünü imha ettirdi. Hayatta kalan 20.000 dosya 1977'de Freedom of Information Act başvurusuyla kamuoyuna açıldı; Senator Kennedy başkanlığındaki Senato duruşmalarında CIA yetkilileri tanıklık etti.</p><p>MKUltra, 'komplo teorisi' kavramının sistematik araştırmayla kanıtlanmış olgulara dönüşebileceğinin ders kitabı örneğidir.</p>",
+meta: [{k:"Dönem",v:"1953–1973"},{k:"Kaynak",v:"ABD Senato Kayıtları"},{k:"Güvenilirlik",v:"Kanıtlanmış"}],
+sources: [
+{text:"ABD Senatosu — Church Committee Report (1977)",url:"https://www.intelligence.senate.gov/sites/default/files/94755_II.pdf"},
+{text:"CIA FOIA — MKUltra Belgeleri",url:"https://www.cia.gov/readingroom/search/site/mkultra"},
+{text:"John Marks — The Search for the Manchurian Candidate (1979)",url:"https://www.worldcat.org"}
+]
+},
+haarp: {
+cat: "Komplo Teorileri · Teknoloji",
+title: "HAARP: İyonosfer Silahı mı, Araştırma Tesisi mi?",
+body: "<p>HAARP, Alaska'nın Gakona kasabasında 180 anten dizisinden oluşan iyonosfer araştırma tesisidir. 1993'te ABD ordusu finansmanıyla kurulmuş; 2015'te Alaska Üniversitesi'ne devredilmiştir.</p><p>Yaygın teoriler deprem tetikleme, kasırca oluşturma ve kitle zihin kontrolünü öne sürer. Tesisin maksimum 3,6 megawattlık gücü orta büyüklükte bir kasırcanın saniyede serbest bıraktığı enerjinin yaklaşık 1/10.000'idir — bu ölçek farkı iklimsel etki teorilerini fiziksel olarak olanaksız kılar.</p><p>Bununla birlikte, bulut tohumlama gibi hava modifikasyon programları onlarca ülkede resmi olarak uygulanmaktadır. 1977 ENMOD Sözleşmesi savaş amaçlı çevre modifikasyonunu yasaklamıştır — bu yasağın varlığı söz konusu teknolojilerin var olduğunun zımni kabulüdür.</p>",
+meta: [{k:"Konum",v:"Gakona, Alaska"},{k:"Kuruluş",v:"1993"},{k:"Güvenilirlik",v:"Büyük Ölçüde Çürütüldü"}],
+sources: [
+{text:"HAARP Resmi Sitesi — UAF",url:"https://haarp.gi.alaska.edu"},
+{text:"Popular Science — What HAARP Is, and Everything It Isn't",url:"https://www.popsci.com"},
+{text:"WMO — Weather Modification Programme",url:"https://www.wmo.int"}
+]
+},
+echelon: {
+cat: "Komplo Teorileri · Gözetim",
+title: "Echelon: 40 Yıl İnkâr Edilen Dinleme Ağı",
+body: "<p>Echelon, 'Beş Göz' olarak bilinen UKUSA İttifakı'nın (ABD, İngiltere, Kanada, Avustralya, Yeni Zelanda) işlettiği küresel sinyal istihbarat ağıdır. 1960'larda Soğuk Savaş döneminde kurulmuş; uydu iletişimlerini, kablo trafiğini ve kısa dalga yayınlarını sistematik biçimde tarayan otomatik istasyonlardan oluşmaktadır.</p><p>1988'de gazeteci Duncan Campbell varlığını ilk kez belgeledi. Hükümetler onlarca yıl inkâr etti. 1999'da Avustralya Başbakanı programı dolaylı teyit etti; Avrupa Parlamentosu ekonomik casusluk kullanımını belgeleyen kapsamlı rapor yayımladı.</p><p>2013'te Snowden belgeleri PRISM ve XKeyscore ile birlikte bu mimarinin gerçek boyutunu gözler önüne serdi.</p>",
+meta: [{k:"Dönem",v:"1960–günümüz"},{k:"Aktörler",v:"UKUSA / Beş Göz"},{k:"Güvenilirlik",v:"Doğrulandı (1999+)"}],
+sources: [
+{text:"Avrupa Parlamentosu — ECHELON Raporu (2001)",url:"https://www.europarl.europa.eu/sides/getDoc.do?pubRef=-//EP//TEXT+REPORT+A5-2001-0264+0+DOC+XML+V0//EN"},
+{text:"The Guardian — Snowden NSA Belgeleri",url:"https://www.theguardian.com/us-news/the-nsa-files"},
+{text:"Duncan Campbell — Somebody's Listening (1988)",url:"https://www.worldcat.org"}
+]
+},
+simya: {
+cat: "Okültizm · Bilim Tarihi",
+title: "Simya: Modern Kimyanın Karanlık Atası",
+body: "<p>Simya, Helenistik Mısır'dan Orta Çağ İslam dünyasına, oradan Rönesans Avrupası'na uzanan yaklaşık 1500 yıllık entelektüel gelenektir. Zahiri amacı kurşunu altına çevirmek ve ölümsüzlük iksiri elde etmekti; ancak gerçek işlevi büyük ölçüde deneysel kimyanın gelişimiydi.</p><p>Isaac Newton simyaya ayırdığı notlar fizik ve matematiğe ayırdıklarından <em>daha fazladır</em>. Robert Boyle da aktif bir simyacıydı. Elementlerin sistematik sınıflandırılması, asit-baz kimyası ve distilasyon tekniklerinin kökleri simya laboratuvarlarına dayanır.</p><p>Carl Jung simyayı bilinçdışının sembolik dili olarak yorumladı; 'Philosophorum Taşı'nı bireyleşme sürecinin metaforu olarak tanımladı.</p>",
+meta: [{k:"Köken",v:"Helenistik Mısır"},{k:"Alan",v:"Proto-kimya / Felsefe"},{k:"Miras",v:"Modern Kimya"}],
+sources: [
+{text:"Lawrence Principe — The Secrets of Alchemy (Univ. of Chicago, 2013)",url:"https://press.uchicago.edu/ucp/books/book/chicago/S/bo14383808.html"},
+{text:"Newton's Alchemical Papers — Cambridge Digital Library",url:"https://cudl.lib.cam.ac.uk/collections/newton"},
+{text:"C.G. Jung — Psychology and Alchemy (1944)",url:"https://www.worldcat.org"}
+]
+},
+kabala: {
+cat: "Okültizm · Yahudi Mistisizmi",
+title: "Kabala ve Sefirot: Varoluşun On Boyutu",
+body: "<p>Kabala, Yahudi mistik geleneğinin 12. yüzyıldan itibaren Güney Fransa ve İspanya'da kristalleşen koludur. Merkezi metni 13. yüzyılda yayımlanan <em>Zohar</em>'dır (Işıltı Kitabı). Temel harita olan <em>Etz Chaim</em> (Yaşam Ağacı) on <em>sefirot</em> ve yirmi iki yol üzerine kuruludur.</p><p>Her sefirot Tanrı'nın farklı bir tezahür katmanını temsil eder: Keter (Taç), Hokhmah (Bilgelik), Binah (Anlayış), Chesed (Sevgi), Gevurah (Güç), Tiferet (Güzellik), Netzach (Zafer), Hod (İhtişam), Yesod (Temel) ve Malkuth (Madde Alemi).</p><p>16. yüzyıldan itibaren Hermetik gelenek bu sistemi Yahudi sınırlarının çok ötesine taşıdı. Golden Dawn Cemiyeti'nden Aleister Crowley'e, modern Wicca'ya kadar pek çok okült sistem Sefirot ağacını temel referans olarak kullanır.</p>",
+meta: [{k:"Köken",v:"12–13. yy. İspanya"},{k:"Ana Metin",v:"Zohar (~1280)"},{k:"Alan",v:"Mistisizm / Felsefe"}],
+sources: [
+{text:"Gershom Scholem — Kabbalah (1974)",url:"https://www.worldcat.org"},
+{text:"Zohar — Daniel Matt Çevirisi (Stanford UP)",url:"https://www.sup.org/books/title/?id=1747"},
+{text:"Jewish Virtual Library — Kabbalah",url:"https://www.jewishvirtuallibrary.org/kabbalah"}
+]
+},
+"altin-oran": {
+cat: "Okültizm · Matematik · Semboloji",
+title: "Φ: Altın Oran, Doğa ve Kutsal Geometri",
+body: "<p>Φ (phi ≈ 1,6180339…), bir doğruyu 'büyük parçanın küçük parçaya oranı, bütünün büyük parçaya oranına eşit olacak şekilde' bölen irrasyonel matematiksel sabittir. Fibonacci dizisinin ardışık terimleri arasındaki oran bu değere yakınsar.</p><p>Pek çok kaynak altın oranın Büyük Piramit'te, Parthenon'da ve Leonardo'nun eserlerinde kasıtlı kullanıldığını ileri sürer. Matematikçi Keith Devlin'in araştırmaları bu iddiaların önemli bir bölümünün ölçüm seçimlerinden kaynaklanan doğrulama önyargısı içerdiğini göstermiştir.</p><p>Bununla birlikte Φ'nin doğadaki varlığı gerçektir: ayçiçeği tohumlarının çift yönlü sarmalları, deniz kabuklarının logaritmik büyümesi, bitkilerdeki yaprak dizilim açısı. Bu örüntüler büyüme biyomekaniğinin verimlilik kısıtlamalarından kaynaklanır.</p>",
+meta: [{k:"Alan",v:"Matematik / Sanat Tarihi"},{k:"Değer",v:"≈ 1,6180339..."},{k:"Durum",v:"Kısmen Doğrulanmış"}],
+sources: [
+{text:"Mario Livio — The Golden Ratio (2002)",url:"https://www.worldcat.org"},
+{text:"Keith Devlin — The Myth That Will Not Go Away (MAA, 2007)",url:"https://www.maa.org/external_archive/devlin/devlin_05_07.html"},
+{text:"Ron Knott — Fibonacci & the Golden Section",url:"https://r.knott.surrey.ac.uk/Fibonacci/fib.html"}
+]
 }
-
-if(searchInput) {
-    searchInput.addEventListener("input", () => {
-        const query = normalizeText(searchInput.value);
-        let visibleCount = 0;
-
-        indexItems.forEach(item => {
-            const text = normalizeText(item.dataset.terms + " " + item.textContent);
-            const isMatch = text.includes(query);
-            item.classList.toggle("hidden", !isMatch);
-            if(isMatch) visibleCount++;
-        });
-
-        countDisplay.textContent = query ? `${visibleCount} sonuç bulundu` : "";
-    });
-}
-
-/* ── MODAL SİSTEMİ ─────────────────────────── */
-const modalOverlay = document.getElementById("modalOverlay");
-const closeModal = document.getElementById("closeModal");
-const cards = document.querySelectorAll(".entry-card");
-
-const articleData = {
-    anunnaki: {
-        title: "Anunnaki: Gökten Gelenler",
-        body: "Sümer mitolojisinde Anunnaki, gökyüzü tanrısı Anu'nun soyundan gelen bir grup tanrıyı temsil eder..."
-    }
 };
-
-cards.forEach(card => {
-    card.addEventListener("click", () => {
-        const id = card.getAttribute("data-article");
-        if(articleData[id]) {
-            document.getElementById("mTitle").textContent = articleData[id].title;
-            document.getElementById("mBody").innerHTML = `<p>${articleData[id].body}</p>`;
-            modalOverlay.classList.add("open");
-            document.body.style.overflow = "hidden"; // Kaydırmayı engelle
-        }
-    });
+function esc(s){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+var overlay   = document.getElementById("articleModal");
+var modalBox  = document.getElementById("modalBox");
+var mCat      = document.getElementById("modalCat");
+var mTitle    = document.getElementById("modalTitle");
+var mBody     = document.getElementById("modalBody");
+var mClose    = document.getElementById("modalClose");
+var mSources  = document.getElementById("modalSources");
+var lastFocus = null;
+var curId     = null;
+function openModal(id){
+var d = A[id]; if(!d) return;
+curId = id; lastFocus = document.activeElement;
+mCat.textContent   = d.cat;
+mTitle.textContent = d.title;
+var meta = d.meta.map(function(m){ return '<div class="modal-meta-item">'+m.k+'<span>'+m.v+'</span></div>'; }).join("");
+mBody.innerHTML = d.body + '<div class="modal-meta">'+meta+'</div>';
+if(d.sources && d.sources.length){
+var li = d.sources.map(function(s){ return '<li><a href="'+s.url+'" target="_blank" rel="noopener">'+s.text+'</a></li>'; }).join("");
+mSources.innerHTML = '<div class="modal-sources"><div class="modal-sources-title">Kaynakça &amp; İleri Okuma</div><ul class="source-list">'+li+'</ul></div>';
+} else { mSources.innerHTML = ""; }
+overlay.classList.add("open");
+document.body.style.overflow = "hidden";
+setTimeout(function(){ mClose.focus(); }, 60);
+}
+function closeModal(){
+overlay.classList.remove("open");
+document.body.style.overflow = "";
+if(lastFocus) lastFocus.focus();
+}
+document.body.addEventListener("click", function(e){
+if(e.target === mClose || e.target.closest("#modalClose")){ closeModal(); return; }
+if(e.target === overlay){ closeModal(); return; }
+var t = e.target.closest("[data-modal]");
+if(t){ e.preventDefault(); openModal(t.getAttribute("data-modal")); return; }
 });
-
-closeModal.addEventListener("click", () => {
-    modalOverlay.classList.remove("open");
-    document.body.style.overflow = "auto";
+document.addEventListener("keydown", function(e){
+if(e.key === "Escape" && overlay.classList.contains("open")){ closeModal(); }
 });
-
-/* ── REVEAL ANIMATION ──────────────────────── */
-const observer = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting) {
-            entry.target.classList.add("visible");
-        }
-    });
-}, { threshold: 0.1 });
-
-document.querySelectorAll(".js-reveal").forEach(el => observer.observe(el));
-
+modalBox.addEventListener("keydown", function(e){
+if(e.key !== "Tab") return;
+var f = Array.from(modalBox.querySelectorAll("button, a[href], [tabindex]:not([tabindex='-1'])"));
+if(!f.length) return;
+if(e.shiftKey && document.activeElement===f[0]){ e.preventDefault(); f[f.length-1].focus(); }
+else if(!e.shiftKey && document.activeElement===f[f.length-1]){ e.preventDefault(); f[0].focus(); }
+});
+function flash(btn, msg){
+var old = btn.textContent; btn.textContent = msg; btn.classList.add("copied");
+setTimeout(function(){ btn.textContent = old; btn.classList.remove("copied"); }, 2000);
+}
+var btnLink = document.getElementById("btnCopyLink");
+var btnTwit = document.getElementById("btnShareTwitter");
+var btnText = document.getElementById("btnCopyText");
+if(btnLink) btnLink.addEventListener("click", function(){
+navigator.clipboard.writeText(location.href + "#madde-" + (curId||"")).then(function(){ flash(btnLink,"Kopyalandı ✓"); });
+});
+if(btnTwit) btnTwit.addEventListener("click", function(){
+if(!curId) return;
+var d = A[curId];
+window.open("https://twitter.com/intent/tweet?text="+encodeURIComponent('"'+d.title+'" — ARCANA')+"&url="+encodeURIComponent(location.href),"_blank","noopener,width=600,height=400");
+});
+if(btnText) btnText.addEventListener("click", function(){
+if(!curId) return;
+var d = A[curId];
+navigator.clipboard.writeText(d.title+"\n"+d.cat+"\nARCANA — "+location.href).then(function(){ flash(btnText,"Kopyalandı ✓"); });
+});
+var NAV = {"Komplo Teorileri":"#komplo-teorileri","Antik Mitoloji":"#antik-mitoloji","Okültizm & Semboller":"#okultizm-semboller","Kronoloji":"#kronoloji"};
+document.querySelectorAll(".topnav a").forEach(function(a){
+var t = NAV[a.textContent.trim()];
+if(t){
+a.href = t;
+a.addEventListener("click", function(e){
+e.preventDefault();
+document.querySelectorAll(".topnav a").forEach(function(x){ x.classList.remove("active"); });
+a.classList.add("active");
+var el = document.querySelector(t); if(el) el.scrollIntoView({behavior:"smooth",block:"start"});
+});
+} else {
+a.addEventListener("click", function(){
+document.querySelectorAll(".topnav a").forEach(function(x){ x.classList.remove("active"); });
+a.classList.add("active");
+});
+}
+});
+var si = document.getElementById("indexSearch");
+var sc = document.getElementById("searchCount");
+var il = document.querySelectorAll("#indexList li");
+function norm(s){ return (s||"").toLowerCase().replace(/ı/g,"i").replace(/ğ/g,"g").replace(/ü/g,"u").replace(/ş/g,"s").replace(/ö/g,"o").replace(/ç/g,"c"); }
+if(si) si.addEventListener("input", function(){
+var q = norm(si.value.trim()); var n = 0;
+il.forEach(function(li){
+var nm = li.querySelector(".il-name");
+var ok = !q || norm((li.dataset.terms||"")+" "+(nm?nm.textContent:"")).indexOf(q)>-1;
+li.classList.toggle("hidden",!ok); if(ok) n++;
+});
+if(sc) sc.textContent = q ? n+"/"+il.length+" madde" : "";
+});
+var creds = document.querySelector(".sb-block .cred-fill");
+if(creds){
+new IntersectionObserver(function(entries){
+entries.forEach(function(e){
+if(!e.isIntersecting) return;
+e.target.querySelectorAll(".cred-fill").forEach(function(f){
+var w = f.style.width; f.style.transition="none"; f.style.width="0";
+requestAnimationFrame(function(){ requestAnimationFrame(function(){ f.style.transition=""; f.style.width=w; }); });
+});
+});
+},{threshold:0.3}).observe(creds.closest(".sb-block"));
+}
+})();
 </script>
 </body>
 </html>
